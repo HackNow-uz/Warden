@@ -16,3 +16,15 @@ def test_send_email_uses_smtp(mock_smtp):
     inst = mock_smtp.return_value.__enter__.return_value
     send_email("h", 1025, "f@x", "t@y", "subj", "body")
     assert inst.send_message.called
+    assert not inst.starttls.called   # mailhog: TLS yo'q
+    assert not inst.login.called      # auth yo'q
+
+
+@patch("app.notifiers.smtplib.SMTP")
+def test_send_email_tls_and_login(mock_smtp):
+    inst = mock_smtp.return_value.__enter__.return_value
+    send_email("smtp.gmail.com", 587, "f@x", "t@y", "s", "b",
+               user="u@x", password="pw", use_tls=True)
+    assert inst.starttls.called
+    inst.login.assert_called_once_with("u@x", "pw")
+    assert inst.send_message.called

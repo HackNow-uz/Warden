@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     smtp_port: int = 1025
     smtp_from: str = "tizim@local"
     smtp_to: str = "secops@local"
+    smtp_user: str = ""        # bo'sh => auth yo'q (mailhog)
+    smtp_password: str = ""
+    smtp_tls: bool = False     # gmail/relay uchun true
 
     # TLS: do NOT disable verification. For Wazuh self-signed certs, mount the
     # generated root CA and point CA_BUNDLE at it. Empty => use system trust store.

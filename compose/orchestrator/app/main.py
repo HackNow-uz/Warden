@@ -25,7 +25,8 @@ def _alert_failure(s, exc):
     try:
         send_telegram(s.telegram_bot_token, s.telegram_chat_id, err)
         send_email(s.smtp_host, s.smtp_port, s.smtp_from, s.smtp_to,
-                   "TIZIM XATO", err)
+                   "TIZIM XATO", err,
+                   user=s.smtp_user, password=s.smtp_password, use_tls=s.smtp_tls)
     except Exception:  # noqa: BLE001 — alerting must never mask the original error
         pass
     print(err, file=sys.stderr)
@@ -43,7 +44,8 @@ def run_daily():
         text = render_text_report(findings)
         send_telegram(s.telegram_bot_token, s.telegram_chat_id, text)
         send_email(s.smtp_host, s.smtp_port, s.smtp_from, s.smtp_to,
-                   "TIZIM kunlik hisobot", text)
+                   "TIZIM kunlik hisobot", text,
+                   user=s.smtp_user, password=s.smtp_password, use_tls=s.smtp_tls)
         print(text)
         return 0
     except Exception as exc:  # noqa: BLE001 — convert to alert + non-zero exit

@@ -11,12 +11,17 @@ def send_telegram(bot_token, chat_id, text):
     return r.status_code == 200
 
 
-def send_email(host, port, sender, to, subject, body):
+def send_email(host, port, sender, to, subject, body,
+               user=None, password=None, use_tls=False):
     msg = EmailMessage()
     msg["From"] = sender
     msg["To"] = to
     msg["Subject"] = subject
     msg.set_content(body)
-    with smtplib.SMTP(host, port, timeout=20) as s:
+    with smtplib.SMTP(host, port, timeout=30) as s:
+        if use_tls:
+            s.starttls()
+        if user and password:
+            s.login(user, password)
         s.send_message(msg)
     return True
