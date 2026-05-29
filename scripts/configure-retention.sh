@@ -6,11 +6,17 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ENVF=compose/.env
 DAYS="${RETENTION_DAYS:-90}"
-IDX_URL="${INDEXER_URL:-https://localhost:9200}"
+# Sertifikat SAN 'wazuh.indexer' uchun — host'dan localhost-mapped portga --resolve bilan
+# ulanamiz, shunda CA tekshiruvi (hostname) ham, localhost binding ham ishlaydi.
+IDX_HOST="${INDEXER_HOST:-wazuh.indexer}"
+IDX_PORT="${INDEXER_PORT:-9200}"
+HOST_IP="${INDEXER_HOST_IP:-127.0.0.1}"
 PW=$(grep '^INDEXER_PASSWORD=' "$ENVF" 2>/dev/null | cut -d= -f2- || true)
 USER=$(grep '^INDEXER_USER=' "$ENVF" 2>/dev/null | cut -d= -f2- || true); USER="${USER:-admin}"
 CA="${CA_BUNDLE:-compose/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem}"
-CACURL=( --cacert "$CA" ); [ -f "$CA" ] || CACURL=( -k )
+CACURL=( --cacert "$CA" --resolve "${IDX_HOST}:${IDX_PORT}:${HOST_IP}" )
+[ -f "$CA" ] || CACURL=( -k --resolve "${IDX_HOST}:${IDX_PORT}:${HOST_IP}" )
+IDX_URL="https://${IDX_HOST}:${IDX_PORT}"
 
 read -r -d '' POLICY <<JSON || true
 {
