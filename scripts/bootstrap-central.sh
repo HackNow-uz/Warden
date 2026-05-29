@@ -32,8 +32,10 @@ echo "[7/7] Orchestrator + mailhog..."
 ( cd compose && docker compose up -d --build )
 
 echo
+DASH_PORT=$(grep -h '^WAZUH_DASHBOARD_PORT=' compose/.env 2>/dev/null | cut -d= -f2); DASH_PORT=${DASH_PORT:-8444}
+DD_PORT=$(grep -h '^DD_PORT=' compose/defectdojo/.env 2>/dev/null | cut -d= -f2); DD_PORT=${DD_PORT:-8080}
 echo "Tayyor. Kirish faqat localhost (xavfsizlik) — SSH tunnel orqali:"
-echo "  Wazuh dashboard : https://localhost:443"
-echo "  DefectDojo      : http://localhost:8080"
-echo "  Mailhog (sinov) : http://localhost:8025"
+echo "  Wazuh dashboard : https://127.0.0.1:${DASH_PORT}"
+echo "  DefectDojo      : http://127.0.0.1:${DD_PORT}"
+echo "  Mailhog (sinov) : http://127.0.0.1:8025"
 echo "Eslatma: agentlar -> bash scripts/enroll-agents.sh (inventory.ini to'ldirilgach)"

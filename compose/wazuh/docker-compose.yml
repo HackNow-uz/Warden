@@ -16,7 +16,7 @@ services:
       - "1514:1514"
       - "1515:1515"
       - "514:514/udp"
-      - "55000:55000"
+      - "127.0.0.1:55000:55000"
     environment:
       - INDEXER_URL=https://wazuh.indexer:9200
       - INDEXER_USERNAME=admin
@@ -50,7 +50,7 @@ services:
     hostname: wazuh.indexer
     restart: always
     ports:
-      - "9200:9200"
+      - "127.0.0.1:9200:9200"
     environment:
       - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
     ulimits:
@@ -75,7 +75,7 @@ services:
     hostname: wazuh.dashboard
     restart: always
     ports:
-      - 443:5601
+      - "127.0.0.1:${WAZUH_DASHBOARD_PORT:-8444}:5601"
     environment:
       - INDEXER_USERNAME=admin
       - INDEXER_PASSWORD=SecretPassword
