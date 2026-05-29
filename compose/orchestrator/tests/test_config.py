@@ -11,6 +11,7 @@ def test_settings_reads_env(monkeypatch):
     monkeypatch.setenv("DD_API_TOKEN", "tok")
     s = Settings()
     assert s.wazuh_api_user == "wazuh-wui"
+    assert s.indexer_password == "ipw"
     assert s.defectdojo_url.endswith(":8080")
     assert s.verify is True  # SECURE default — TLS verification ON
 

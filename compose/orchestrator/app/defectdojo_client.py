@@ -2,7 +2,7 @@ import io
 import requests
 
 
-def import_scan(dd_url, token, product_id, scan_type, target, raw_json):
+def import_scan(dd_url, token, scan_type, target, raw_json):
     headers = {"Authorization": f"Token {token}"}
     data = {
         "scan_type": scan_type,
@@ -24,6 +24,6 @@ def import_to_defectdojo(settings, results):
     n = 0
     for res in results:
         import_scan(settings.defectdojo_url, settings.dd_api_token,
-                    settings.dd_product_id, res["scan_type"], res["target"], res["raw"])
+                    res["scan_type"], res["target"], res["raw"])
         n += 1
     return n

@@ -5,8 +5,9 @@ def aggregate_severities(findings):
     counts = {s: 0 for s in SEVERITIES}
     for f in findings:
         sev = f.get("severity", "Low").title()
-        if sev in counts:
-            counts[sev] += 1
+        if sev not in counts:
+            sev = "Low"  # noma'lum severity -> Low (jami bilan mos bo'lishi uchun)
+        counts[sev] += 1
     return counts
 
 
