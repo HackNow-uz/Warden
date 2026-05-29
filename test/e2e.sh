@@ -18,12 +18,13 @@ case "$code" in
   *) fail "defectdojo $code";;
 esac
 
-# 3. Agent enrolled
+# 3. Agent enrolled (agent o'z hostname'i bilan ro'yxatdan o'tadi — id!=000 sanaymiz)
 TOKEN=$(curl -sk -u wazuh-wui:MyS3cr37P450r.*- -X POST \
   "https://localhost:55000/security/user/authenticate?raw=true")
 agents=$(curl -sk -H "Authorization: Bearer $TOKEN" \
-  "https://localhost:55000/agents?select=name" | grep -c rocky-target || true)
-[ "$agents" -ge 1 ] && pass "agent enrolled" || fail "agent topilmadi"
+  "https://localhost:55000/agents?select=id" \
+  | python3 -c "import sys,json;print(sum(1 for a in json.load(sys.stdin)['data']['affected_items'] if a['id']!='000'))" 2>/dev/null || echo 0)
+[ "$agents" -ge 1 ] && pass "agent enrolled ($agents)" || fail "agent topilmadi"
 
 # 4. Orchestrator daily run prints a report
 out=$(cd compose && docker compose run --rm orchestrator python -m app.main run-daily)
