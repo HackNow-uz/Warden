@@ -1,0 +1,38 @@
+#!/var/ossec/framework/python/bin/python3
+# Wazuh integration: yuqori darajali alertni Telegram'ga yuboradi.
+# Integrator argumentlari: argv[1]=alert fayli, argv[2]=api_key (ishlatilmaydi),
+#                          argv[3]=hook_url (format: BOT_TOKEN|CHAT_ID)
+import sys
+import json
+import urllib.request
+import urllib.parse
+
+if len(sys.argv) < 4:
+    sys.exit(0)
+
+alert_file = sys.argv[1]
+hook = sys.argv[3]
+bot, _, chat = hook.partition("|")
+if not bot or not chat or bot == "BOT_TOKEN":
+    # hali sozlanmagan — jimgina chiqamiz (xato yo'q)
+    sys.exit(0)
+
+try:
+    with open(alert_file) as f:
+        alert = json.load(f)
+except (OSError, ValueError):
+    sys.exit(0)
+
+rule = alert.get("rule", {})
+agent = alert.get("agent", {})
+msg = (
+    f"\U0001F6E1 TIZIM alert [L{rule.get('level', '')}] "
+    f"{agent.get('name', '?')}: {rule.get('description', 'alert')}"
+)
+
+data = urllib.parse.urlencode({"chat_id": chat, "text": msg}).encode()
+url = f"https://api.telegram.org/bot{bot}/sendMessage"
+try:
+    urllib.request.urlopen(url, data=data, timeout=15)  # noqa: S310 (https only)
+except Exception:
+    sys.exit(0)
