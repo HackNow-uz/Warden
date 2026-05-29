@@ -6,6 +6,7 @@ def import_scan(dd_url, token, scan_type, target, raw_json):
     headers = {"Authorization": f"Token {token}"}
     data = {
         "scan_type": scan_type,
+        "product_type_name": "TIZIM",       # auto_create uchun shart
         "product_name": "TIZIM Infra",
         "engagement_name": f"daily-{target}",
         "auto_create_context": "true",
