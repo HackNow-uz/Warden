@@ -110,7 +110,7 @@ bash test/e2e.sh
    `CHANGE_ME` / bo'sh qiymatlarni real qiymatlar bilan to'ldiring
    (`openssl rand -base64 24`, `python -c 'import secrets;print(secrets.token_urlsafe(50))'`).
 2. **Default parollar:** Wazuh `INDEXER_PASSWORD`, `API_PASSWORD`, dashboard parolini o'zgartiring.
-3. **DD_ALLOWED_HOSTS:** o'z FQDN'ingizni qo'shing.
+3. **DD_ALLOWED_HOSTS:** o'z FQDN'ingiz + `nginx` (orchestrator shu nom bilan ulanadi) bo'lishi shart, aks holda Django 400 Bad Request.
 4. **Telegram:** `wazuh_manager.conf` ichidagi `<hook_url>BOT_TOKEN|CHAT_ID</hook_url>` va
    `compose/.env`dagi `TELEGRAM_*` ni real qiymatlar bilan almashtiring.
 5. **SMTP:** mailhog o'rniga real SMTP server (`SMTP_HOST/PORT/FROM/TO`).
