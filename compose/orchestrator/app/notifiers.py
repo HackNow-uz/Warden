@@ -13,6 +13,9 @@ def send_telegram(bot_token, chat_id, text):
 
 def send_email(host, port, sender, to, subject, body,
                user=None, password=None, use_tls=False):
+    # Parolni cleartext kanalda yubormaslik: auth faqat TLS bilan
+    if (user or password) and not use_tls:
+        raise ValueError("SMTP autentifikatsiyasi use_tls=True talab qiladi")
     msg = EmailMessage()
     msg["From"] = sender
     msg["To"] = to

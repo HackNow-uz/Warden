@@ -20,6 +20,12 @@ def test_send_email_uses_smtp(mock_smtp):
     assert not inst.login.called      # auth yo'q
 
 
+def test_send_email_refuses_auth_without_tls():
+    import pytest
+    with pytest.raises(ValueError):
+        send_email("h", 25, "f@x", "t@y", "s", "b", user="u", password="p", use_tls=False)
+
+
 @patch("app.notifiers.smtplib.SMTP")
 def test_send_email_tls_and_login(mock_smtp):
     inst = mock_smtp.return_value.__enter__.return_value
