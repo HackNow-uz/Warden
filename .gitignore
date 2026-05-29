@@ -1,0 +1,22 @@
+# secrets & env
+.env
+*.env
+!*.env.example
+# certs & keys
+*.pem
+*.key
+*.crt
+compose/wazuh/config/wazuh_indexer_ssl_certs/
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+# ansible
+*.retry
+ansible/inventory.ini
+# scan output
+*.scan.json
+scanning/_out/
+# test artifacts
+test/_out/

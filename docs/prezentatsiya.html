@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TIZIM — Ichki Xavfsizlik Monitoring Platformasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#07090d;
+    --bg2:#0b0f17;
+    --panel:#10151f;
+    --panel2:#141b27;
+    --line:rgba(255,255,255,.075);
+    --line-strong:rgba(255,255,255,.14);
+    --ink:#e8eef7;
+    --dim:#9aa8ba;
+    --faint:#5a6776;
+    --accent:#2ee6c4;
+    --accent2:#13b99c;
+    --gold:#ffce6b;
+    --crit:#ff3b5c;
+    --high:#ff8a4c;
+    --med:#ffc53d;
+    --low:#5ab2ff;
+    --r:14px;
+    --maxw:1180px;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --disp:"Chakra Petch","IBM Plex Sans",system-ui,sans-serif;
+    --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--body);
+    font-weight:400;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.55;
+    overflow:hidden;
+  }
+
+  /* ---------- atmosphere ---------- */
+  .bg-fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .bg-grid{
+    position:absolute;inset:-2px;
+    background-image:
+      linear-gradient(rgba(46,230,196,.045) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(46,230,196,.045) 1px,transparent 1px);
+    background-size:46px 46px;
+    mask-image:radial-gradient(ellipse 95% 75% at 50% 38%,#000 35%,transparent 78%);
+    -webkit-mask-image:radial-gradient(ellipse 95% 75% at 50% 38%,#000 35%,transparent 78%);
+  }
+  .bg-glow{
+    position:absolute;left:50%;top:-12%;width:1100px;height:1100px;transform:translateX(-50%);
+    background:radial-gradient(circle at 50% 50%,rgba(46,230,196,.16),rgba(19,185,156,.05) 38%,transparent 62%);
+    filter:blur(8px);
+  }
+  .bg-noise{
+    position:absolute;inset:0;opacity:.035;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .scan-sweep{
+    position:absolute;left:0;right:0;height:140px;
+    background:linear-gradient(180deg,transparent,rgba(46,230,196,.07),transparent);
+    animation:sweep 11s linear infinite;
+  }
+  @keyframes sweep{0%{top:-160px}100%{top:100%}}
+
+  /* ---------- deck / slides ---------- */
+  .deck{position:relative;z-index:1;height:100vh;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none}
+  .deck::-webkit-scrollbar{display:none}
+  .slide{
+    min-height:100vh;scroll-snap-align:start;scroll-snap-stop:always;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:64px 48px 84px;position:relative;
+  }
+  .wrap{width:100%;max-width:var(--maxw);margin:0 auto}
+
+  /* kicker */
+  .kick{
+    font-family:var(--mono);font-size:12.5px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--accent);display:flex;align-items:center;gap:12px;margin-bottom:22px;
+  }
+  .kick::before{content:"";width:34px;height:1px;background:linear-gradient(90deg,var(--accent),transparent)}
+  .kick .n{color:var(--faint)}
+
+  h1,h2,h3{font-family:var(--disp);font-weight:600;line-height:1.05;letter-spacing:-.01em}
+  h2{font-size:clamp(30px,4.4vw,54px);margin-bottom:18px}
+  h2 .em{color:var(--accent)}
+  .lead{font-size:clamp(16px,1.7vw,20px);color:var(--dim);max-width:62ch;font-weight:300}
+
+  /* ---------- hero ---------- */
+  .hero{align-items:flex-start}
+  .hero .badge{
+    font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--dim);border:1px solid var(--line-strong);border-radius:100px;
+    padding:8px 16px;display:inline-flex;align-items:center;gap:10px;margin-bottom:34px;
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent);animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .hero h1{
+    font-size:clamp(62px,15vw,210px);font-weight:700;letter-spacing:-.03em;line-height:.86;
+    background:linear-gradient(180deg,#fff 8%,#cfe9e2 46%,var(--accent2) 130%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    text-shadow:0 0 70px rgba(46,230,196,.18);
+  }
+  .hero .sub{font-family:var(--disp);font-size:clamp(18px,2.5vw,30px);font-weight:500;color:var(--ink);margin-top:18px}
+  .hero .desc{margin-top:18px;color:var(--dim);max-width:60ch;font-weight:300;font-size:clamp(15px,1.6vw,18px)}
+  .hero .meta{
+    margin-top:48px;display:flex;flex-wrap:wrap;gap:14px 30px;
+    font-family:var(--mono);font-size:12.5px;color:var(--faint);letter-spacing:.06em;
+  }
+  .hero .meta b{color:var(--dim);font-weight:500}
+  .scanline{
+    position:absolute;left:48px;right:48px;bottom:120px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    opacity:.5;overflow:visible;
+  }
+  .scanline::after{content:"";position:absolute;top:-2px;left:0;width:80px;height:5px;border-radius:4px;
+    background:var(--accent);filter:blur(3px);animation:run 5.5s ease-in-out infinite}
+  @keyframes run{0%,100%{left:0}50%{left:calc(100% - 80px)}}
+
+  /* ---------- cards / grid ---------- */
+  .grid{display:grid;gap:18px;margin-top:38px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .card{
+    background:linear-gradient(165deg,var(--panel),var(--bg2));
+    border:1px solid var(--line);border-radius:var(--r);padding:24px 22px;position:relative;overflow:hidden;
+    transition:border-color .3s,transform .3s;
+  }
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent 70%);opacity:.5}
+  .card:hover{border-color:var(--line-strong);transform:translateY(-3px)}
+  .material-symbols-outlined{
+    font-family:"Material Symbols Outlined";font-weight:normal;font-style:normal;line-height:1;
+    letter-spacing:normal;text-transform:none;white-space:nowrap;direction:ltr;display:inline-block;
+    -webkit-font-feature-settings:"liga";-webkit-font-smoothing:antialiased;
+    font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;
+  }
+  .card .ico{
+    width:50px;height:50px;border-radius:13px;margin-bottom:16px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 30% 25%,rgba(46,230,196,.18),rgba(46,230,196,.06));
+    border:1px solid rgba(46,230,196,.28);color:var(--accent);font-size:28px;
+    box-shadow:inset 0 0 18px rgba(46,230,196,.08);
+  }
+  .card h3{font-size:18px;margin-bottom:8px;color:var(--ink)}
+  .card p{font-size:14.5px;color:var(--dim);font-weight:300}
+  .card .tag{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase;display:block;margin-bottom:12px}
+
+  .stat{font-family:var(--disp);font-size:42px;font-weight:700;color:var(--accent);line-height:1}
+  .stat small{font-size:18px;color:var(--dim)}
+
+  ul.clean{list-style:none;margin-top:26px;display:grid;gap:14px}
+  ul.clean li{position:relative;padding-left:30px;color:var(--dim);font-size:16px;font-weight:300}
+  ul.clean li::before{content:"▸";position:absolute;left:4px;top:0;color:var(--accent);font-size:14px}
+  ul.clean li b{color:var(--ink);font-weight:600}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:4px 10px;border-radius:6px;border:1px solid var(--line-strong);color:var(--dim)}
+  .pill.ok{color:var(--accent);border-color:rgba(46,230,196,.4)}
+  .pill.warn{color:var(--med);border-color:rgba(255,197,61,.4)}
+
+  /* severity legend chips */
+  .sev{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12px;color:var(--dim)}
+  .sev i{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .crit{background:var(--crit)} .high{background:var(--high)} .med{background:var(--med)} .low{background:var(--low)}
+
+  /* ---------- matrix table ---------- */
+  table.matrix{width:100%;border-collapse:collapse;margin-top:34px;font-size:14.5px}
+  table.matrix th,table.matrix td{padding:13px 14px;text-align:center;border-bottom:1px solid var(--line)}
+  table.matrix thead th{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:500;border-bottom:1px solid var(--line-strong)}
+  table.matrix tbody th{text-align:left;font-family:var(--disp);font-weight:600;color:var(--ink);font-size:15px}
+  table.matrix td .y{color:var(--accent);font-weight:600}
+  table.matrix td .n{color:var(--faint)}
+  table.matrix td .p{color:var(--gold)}
+  table.matrix tbody tr:hover{background:rgba(255,255,255,.02)}
+  table.matrix .role{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .center-tag{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(46,230,196,.1);border:1px solid rgba(46,230,196,.3);border-radius:6px;padding:3px 9px;display:inline-block}
+
+  /* ---------- mermaid panel ---------- */
+  .diagram{
+    margin-top:30px;background:radial-gradient(ellipse at 50% 0%,rgba(46,230,196,.05),transparent 60%),var(--panel);
+    border:1px solid var(--line);border-radius:var(--r);padding:26px 22px;
+    display:flex;justify-content:center;align-items:center;min-height:120px;
+  }
+  .mermaid{font-family:var(--mono)!important;width:100%}
+  .mermaid:not([data-processed]){color:var(--faint);font-size:12px;opacity:.4;white-space:pre-wrap}
+
+  .two-col{display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-items:center;margin-top:30px}
+  @media(max-width:900px){.two-col{grid-template-columns:1fr}}
+
+  .note{
+    border-left:2px solid var(--gold);background:rgba(255,206,107,.05);
+    padding:16px 20px;border-radius:0 10px 10px 0;margin-top:24px;
+  }
+  .note .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:6px}
+  .note p{color:var(--dim);font-size:14.5px;font-weight:300}
+
+  /* report mock */
+  .report-mock{
+    background:#0a0d13;border:1px solid var(--line-strong);border-radius:12px;overflow:hidden;font-family:var(--mono);font-size:13px;
+  }
+  .report-mock .bar{display:flex;gap:7px;padding:11px 15px;background:#0e131c;border-bottom:1px solid var(--line)}
+  .report-mock .bar i{width:11px;height:11px;border-radius:50%;background:#333a47}
+  .report-mock .body{padding:18px 18px 22px}
+  .report-mock .ln{display:block;color:var(--dim);padding:2px 0}
+  .report-mock .ln b{color:var(--ink)}
+  .report-mock .c{color:var(--crit)} .report-mock .h{color:var(--high)} .report-mock .m{color:var(--med)} .report-mock .a{color:var(--accent)} .report-mock .g{color:var(--faint)}
+
+  /* ---------- chrome: progress, nav, counter ---------- */
+  .topbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:30;background:rgba(255,255,255,.05)}
+  .topbar .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent2),var(--accent));box-shadow:0 0 12px var(--accent);transition:width .4s cubic-bezier(.4,0,.2,1)}
+  .brandmark{position:fixed;top:20px;left:32px;z-index:30;font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;display:flex;align-items:center;gap:9px}
+  .brandmark .sq{width:13px;height:13px;border:1.5px solid var(--accent);transform:rotate(45deg)}
+  .brandmark b{color:var(--ink)}
+  .counter{position:fixed;bottom:22px;right:34px;z-index:30;font-family:var(--mono);font-size:12.5px;color:var(--faint)}
+  .counter b{color:var(--accent);font-size:16px}
+  .nav-dots{position:fixed;right:26px;top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:11px}
+  .nav-dots button{width:9px;height:9px;border-radius:50%;border:1px solid var(--faint);background:transparent;cursor:pointer;padding:0;transition:all .25s}
+  .nav-dots button:hover{border-color:var(--accent)}
+  .nav-dots button.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px var(--accent);transform:scale(1.25)}
+  .hint{position:fixed;bottom:22px;left:34px;z-index:30;font-family:var(--mono);font-size:11.5px;color:var(--faint);letter-spacing:.05em}
+  .hint kbd{border:1px solid var(--line-strong);border-radius:4px;padding:1px 6px;color:var(--dim);font-size:11px}
+
+  /* reveal */
+  [data-reveal]{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .slide.is-active [data-reveal]{opacity:1;transform:none}
+
+  @media(max-width:760px){
+    .slide{padding:80px 22px 90px}
+    .g2,.g3,.g4{grid-template-columns:1fr}
+    .nav-dots{display:none}
+    .hint{display:none}
+  }
+
+  /* print → PDF handout */
+  @media print{
+    body{overflow:visible;background:#fff;color:#111}
+    .bg-fx,.topbar,.nav-dots,.counter,.hint,.brandmark,.scanline{display:none!important}
+    .deck{height:auto;overflow:visible;display:block}
+    .slide{min-height:auto;page-break-after:always;padding:34px}
+    h2,.hero h1{color:#0a3d34!important;-webkit-text-fill-color:#0a3d34!important}
+    .card,.diagram{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-fx">
+  <div class="bg-glow"></div>
+  <div class="bg-grid"></div>
+  <div class="scan-sweep"></div>
+  <div class="bg-noise"></div>
+</div>
+
+<div class="topbar"><div class="fill" id="fill"></div></div>
+<div class="brandmark"><span class="sq"></span> <b>TIZIM</b></div>
+<div class="counter"><b id="cur">01</b> / <span id="tot">13</span></div>
+<div class="nav-dots" id="dots"></div>
+<div class="hint"><kbd>↓</kbd> <kbd>↑</kbd> slayd · <kbd>F</kbd> butun ekran</div>
+
+<main class="deck" id="deck">
+
+  <!-- 01 — COVER -->
+  <section class="slide hero">
+    <div class="wrap">
+      <span class="badge" data-reveal><span class="dot"></span> Ichki Loyiha · Maxfiy · 2026</span>
+      <h1 data-reveal>TIZIM</h1>
+      <div class="sub" data-reveal>Ichki Xavfsizlik Monitoring Platformasi</div>
+      <p class="desc" data-reveal>Barcha serverlardagi paketlar, Docker image'lar va dasturiy bog'liqliklardagi zaifliklarni avtomatik aniqlab, har kuni xavfsizlik hisobotini yetkazib beruvchi markazlashgan tizim.</p>
+      <div class="meta" data-reveal>
+        <span><b>Muhit:</b> RHEL / Rocky / AlmaLinux</span>
+        <span><b>Yondashuv:</b> 100% ochiq kodli</span>
+        <span><b>Stek:</b> Wazuh · Trivy · DefectDojo</span>
+        <span><b>Sana:</b> 2026-05-29</span>
+      </div>
+    </div>
+    <div class="scanline"></div>
+  </section>
+
+  <!-- 02 — PROBLEM -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 01</span> Muammo</div>
+      <h2 data-reveal>Hozir biz <span class="em">ko'r</span> ishlayapmiz</h2>
+      <p class="lead" data-reveal>Infratuzilmamizda yuzlab paket, o'nlab konteyner va kod bog'liqliklari bor. Ularning qaysi birida ma'lum zaiflik (CVE) borligini bugun hech kim muntazam kuzatmaydi.</p>
+      <div class="grid g3">
+        <div class="card" data-reveal>
+          <span class="tag">Ko'rinmaslik</span>
+          <h3>Qo'lda nazorat yo'q</h3>
+          <p>Qaysi serverda eskirgan, zaif paket borligini bilish uchun yagona manba mavjud emas. Tekshiruv tasodifiy va qo'lda.</p>
+        </div>
+        <div class="card" data-reveal>
+          <span class="tag">Konteyner xavfi</span>
+          <h3>Docker image'lar qora quti</h3>
+          <p>Ishlab turgan image'lar ichidagi kutubxonalarda kritik CVE'lar bo'lishi mumkin — ulardan bexabarmiz.</p>
+        </div>
+        <div class="card" data-reveal>
+          <span class="tag">Reaktivlik</span>
+          <h3>Hodisadan keyin bilamiz</h3>
+          <p>Zaiflikni buzg'unchi topib, foydalanganidan keyin xabar topish — eng qimmat va eng kech variant.</p>
+        </div>
+      </div>
+      <div class="note" data-reveal>
+        <span class="lbl">Biznes tavakkali</span>
+        <p>Nazoratsiz qolgan zaiflik — nafaqat texnik, balki reputatsion va moliyaviy xavf. Infratuzilma kengaygani sari qo'lda kuzatuv imkonsiz bo'lib boradi; avtomatlashtirilgan, uzluksiz monitoring zarurat.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 — GOAL / SCOPE -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 02</span> Maqsad va Qamrov</div>
+      <h2 data-reveal>To'rt o'lcham, <span class="em">bitta</span> panel</h2>
+      <p class="lead" data-reveal>Tizim har kuni avtomatik skanlab, quyidagi to'rt yo'nalishdagi zaifliklarni bir markaziy dashboardda jamlaydi va hisobot yuboradi.</p>
+      <div class="grid g4">
+        <div class="card" data-reveal><span class="ico material-symbols-outlined">inventory_2</span><span class="tag">O'lcham 01</span><h3>OS paketlar</h3><p>Serverga o'rnatilgan har bir RPM paket versiyasidagi ma'lum CVE'lar.</p></div>
+        <div class="card" data-reveal><span class="ico material-symbols-outlined">deployed_code</span><span class="tag">O'lcham 02</span><h3>Docker image'lar</h3><p>Konteyner image'lari ichidagi OS va kutubxona zaifliklari.</p></div>
+        <div class="card" data-reveal><span class="ico material-symbols-outlined">account_tree</span><span class="tag">O'lcham 03</span><h3>Kod bog'liqliklari</h3><p>Django (pip) va Next.js (npm), Go modullaridagi zaif kutubxonalar.</p></div>
+        <div class="card" data-reveal><span class="ico material-symbols-outlined">fact_check</span><span class="tag">O'lcham 04</span><h3>Compliance</h3><p>CIS Benchmark / SCAP bo'yicha noto'g'ri sozlamalar auditi.</p></div>
+      </div>
+      <div class="grid g4" style="margin-top:18px">
+        <div class="card" data-reveal><div class="stat">24/7</div><p style="margin-top:10px">Markaziy dashboard va uzluksiz kuzatuv</p></div>
+        <div class="card" data-reveal><div class="stat">1×<small>/kun</small></div><p style="margin-top:10px">Avtomatik xavfsizlik hisoboti (Email / Telegram)</p></div>
+        <div class="card" data-reveal><div class="stat">Agent</div><p style="margin-top:10px">Har serverga yengil agent — markazga ma'lumot uzatadi</p></div>
+        <div class="card" data-reveal><div class="stat">Trend</div><p style="margin-top:10px">Tarixiy o'zgarish — zaifliklar kamayyaptimi yoki o'syaptimi</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 — APPROACH -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 03</span> Yondashuv</div>
+      <h2 data-reveal>Noldan yozmaymiz — <span class="em">tayyor</span> standartni quramiz</h2>
+      <div class="two-col">
+        <div>
+          <ul class="clean">
+            <li data-reveal><b>Sinovdan o'tgan ochiq kodli stek.</b> Wazuh, Trivy va DefectDojo — sanoatda yetuk, keng qo'llaniladigan, bepul yechimlar.</li>
+            <li data-reveal><b>Litsenziya xarajati = 0.</b> Hammasi o'z serverimizda (self-hosted), tashqi SaaS'ga bog'liqlik yo'q, ma'lumot tashqariga chiqmaydi.</li>
+            <li data-reveal><b>Modulli.</b> Avval minimal yadro, keyin bosqichma-bosqich kengaytirish. Har bosqich mustaqil qiymat beradi.</li>
+            <li data-reveal><b>RHEL'ga moslangan.</b> Tanlangan toollar Red Hat oilasining o'z xavfsizlik ma'lumotidan foydalanadi — yolg'on ogohlantirishlar kam.</li>
+          </ul>
+        </div>
+        <div>
+          <div class="card" data-reveal style="padding:28px">
+            <span class="tag">Tanlangan tool'lar</span>
+            <div style="display:grid;gap:16px;margin-top:6px">
+              <div><div style="font-family:var(--disp);font-weight:600;font-size:18px;color:var(--accent)">Wazuh</div><p style="color:var(--dim);font-size:13.5px;font-weight:300">Markaziy SIEM platforma · agent · dashboard · OS CVE · compliance · hisobot</p></div>
+              <div><div style="font-family:var(--disp);font-weight:600;font-size:18px;color:var(--accent)">Trivy</div><p style="color:var(--dim);font-size:13.5px;font-weight:300">Docker image va kod bog'liqlik skaneri · Red Hat advisory bilan</p></div>
+              <div><div style="font-family:var(--disp);font-weight:600;font-size:18px;color:var(--accent)">DefectDojo</div><p style="color:var(--dim);font-size:13.5px;font-weight:300">Barcha natijalarni jamlash · dedup · trend · rejalashtirilgan hisobot</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — ARCHITECTURE -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 04</span> Arxitektura</div>
+      <h2 data-reveal>Ikki qatlamli markazlashgan tizim</h2>
+      <p class="lead" data-reveal>Serverlardagi agentlar Wazuh markaziga ma'lumot uzatadi; Trivy/Grype konteyner va kodni skanlab DefectDojo'ga uzatadi. Ikkala oqim ham bitta kunlik hisobotga birlashadi.</p>
+      <div class="diagram" data-reveal>
+<pre class="mermaid">
+flowchart LR
+  subgraph SRV["RHEL / Rocky / Alma serverlar"]
+    direction TB
+    A1["wazuh-agent<br/>Syscollector"]
+    A2["wazuh-agent"]
+    A3["wazuh-agent"]
+  end
+  subgraph CORE["Wazuh — markaziy platforma"]
+    direction TB
+    M["Wazuh Manager<br/>Vulnerability Detection + SCA/CIS"]
+    IDX[("Wazuh Indexer")]
+    DSH["Wazuh Dashboard"]
+  end
+  CTI{{"Wazuh CTI feed<br/>RHEL · Rocky · Alma · NVD · OSV"}}
+  subgraph SCAN["Konteyner & kod skaneri"]
+    direction TB
+    T["Trivy<br/>image + deps"]
+    G["Grype + Syft<br/>cross-check"]
+  end
+  DD[("DefectDojo<br/>jamlash + trend")]
+  RPT["Kunlik hisobot<br/>Email / Telegram"]
+
+  A1 --> M
+  A2 --> M
+  A3 --> M
+  CTI --> M
+  M <--> IDX
+  IDX --> DSH
+  T --> DD
+  G --> DD
+  M --> RPT
+  DD --> RPT
+
+  classDef core fill:#0f2b27,stroke:#2ee6c4,color:#e8eef7;
+  classDef scan fill:#1a1530,stroke:#5ab2ff,color:#e8eef7;
+  classDef rep fill:#2a1620,stroke:#ff8a4c,color:#e8eef7;
+  class M,IDX,DSH core;
+  class T,G scan;
+  class RPT,DD rep;
+</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — CAPABILITY MATRIX -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 05</span> Komponentlar Matritsasi</div>
+      <h2 data-reveal>Qaysi tool <span class="em">nimani</span> qoplaydi</h2>
+      <table class="matrix" data-reveal>
+        <thead>
+          <tr><th style="text-align:left">Tool</th><th>OS paket CVE</th><th>Docker image</th><th>Kod bog'liqlik</th><th>CIS / SCAP</th><th>Rol</th></tr>
+        </thead>
+        <tbody>
+          <tr><th>Wazuh <span class="role">SIEM</span></th><td><span class="y"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span> native</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td><td><span class="y"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span> SCA+CIS</span></td><td><span class="center-tag">MARKAZ</span></td></tr>
+          <tr><th>Trivy</th><td><span class="y"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span></span></td><td><span class="y"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span> asosiy</span></td><td><span class="y"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span></span></td><td><span class="n">—</span></td><td class="role">skaner</td></tr>
+          <tr><th>Grype + Syft</th><td><span class="y"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span></span></td><td><span class="y"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span></span></td><td><span class="y"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span></span></td><td><span class="n">—</span></td><td class="role">cross-check</td></tr>
+          <tr><th>OpenSCAP + SSG</th><td><span class="p">~ OVAL</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td><td><span class="y"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span> kanonik</span></td><td class="role">compliance</td></tr>
+          <tr><th>DefectDojo</th><td><span class="n">—</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td><td><span class="center-tag">JAMLASH</span></td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;gap:26px;margin-top:22px;flex-wrap:wrap">
+        <span class="sev"><span class="y" style="color:var(--accent)"><span class="material-symbols-outlined" style="font-size:15px;vertical-align:-3px">check</span></span> to'liq qo'llab-quvvatlaydi</span>
+        <span class="sev"><span class="p" style="color:var(--gold)">~</span> qisman / eskirayotgan feed</span>
+        <span class="sev"><span class="n" style="color:var(--faint)">—</span> qoplamaydi</span>
+      </div>
+      <div class="note" data-reveal>
+        <span class="lbl">Nega bitta skaner yetarli emas</span>
+        <p>Mustaqil tadqiqot (KTH, 2025): Trivy ↔ Grype natijalari o'rtasida moslik atigi ~69%. Sabab — har biri turli CVE bazasidan foydalanadi. Shu sababli muhim image'lar uchun ikki skaner natijasini DefectDojo'da jamlash maqsadga muvofiq.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 — DATA FLOW (sequence) -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 06</span> Ma'lumot Oqimi</div>
+      <h2 data-reveal>Bir kunlik skan sikli</h2>
+      <p class="lead" data-reveal>Har kechasi avtomatik ishga tushadi: inventar yig'iladi, CVE'lar moslashtiriladi, konteynerlar skanlanadi va natijalar bitta hisobotga aylanadi.</p>
+      <div class="diagram" data-reveal>
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant CRON as Cron · har kuni 02:00
+  participant AG as wazuh-agent
+  participant WZ as Wazuh Manager
+  participant TR as Trivy
+  participant DD as DefectDojo
+  participant TG as Telegram / Email
+  AG->>WZ: Paket inventari (Syscollector)
+  WZ->>WZ: CVE moslashtirish (CTI feed)
+  CRON->>TR: Image + kod bog'liqlik skani
+  TR->>DD: Natijalar (JSON import)
+  CRON->>WZ: API so'rov — zaifliklar ro'yxati
+  WZ-->>CRON: Aniqlangan CVE'lar
+  CRON->>TG: Kunlik xulosa hisobot
+  DD->>TG: Rejalashtirilgan batafsil hisobot
+</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 — RHEL FEED -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 07</span> RHEL Ma'lumot Manbai</div>
+      <h2 data-reveal>Nega <span class="em">Red Hat</span> ma'lumoti muhim</h2>
+      <p class="lead" data-reveal>RHEL paketlar "backport" tufayli versiya raqamiga qarab xato zaif deb belgilanishi mumkin. Yechim — NVD'ga emas, Red Hat'ning o'z xavfsizlik ma'lumotiga tayanish.</p>
+      <div class="diagram" data-reveal>
+<pre class="mermaid">
+flowchart LR
+  CVE["Yangi CVE e'lon qilindi"] --> NVD["NVD severity<br/>yolg'iz"]
+  CVE --> RH["Red Hat advisory<br/>OVAL / CSAF-VEX + Impact"]
+  NVD --> BAD["Ko'p yolg'on<br/>ogohlantirish"]
+  RH --> GOOD["Aniq, ishonchli natija<br/>backport hisobga olinadi"]
+
+  classDef bad fill:#2a1620,stroke:#ff3b5c,color:#ffd9e0;
+  classDef good fill:#0f2b27,stroke:#2ee6c4,color:#d6fff5;
+  class BAD bad; class GOOD good;
+</pre>
+      </div>
+      <div class="grid g3" style="margin-top:22px">
+        <div class="card" data-reveal><span class="tag">Wazuh</span><p>Markazlashgan CTI feed orqali RHEL, Rocky, Alma, Oracle ma'lumotini oladi.</p></div>
+        <div class="card" data-reveal><span class="tag">Trivy</span><p>Red Hat'ning o'z advisory va "Impact" severity'sidan foydalanadi → false-positive kam.</p></div>
+        <div class="card" data-reveal><span class="tag">Tendensiya</span><p>Red Hat eski OVAL v2 formatdan CSAF/VEX'ga o'tmoqda — toollarni shunga moslab tanladik.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 — DEPLOYMENT PHASES -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 08</span> Joriy Etish Bosqichlari</div>
+      <h2 data-reveal>Bosqichma-bosqich, <span class="em">har qadam</span> qiymat beradi</h2>
+      <div class="diagram" data-reveal>
+<pre class="mermaid">
+flowchart TB
+  P1["FAZA 1 — Minimal<br/>Wazuh single-node + agentlar + Trivy cron<br/>→ birinchi kunlik hisobot"]
+  P2["FAZA 2 — Jamlash<br/>+ DefectDojo + Grype cross-check<br/>→ dedup va trend"]
+  P3["FAZA 3 — Compliance<br/>+ OpenSCAP / SSG CIS audit<br/>→ standartlarga muvofiqlik"]
+  P4["FAZA 4 — To'liq avtomatika<br/>+ Telegram alert + rejalashtirilgan hisobot<br/>→ proaktiv ogohlantirish"]
+  P1 --> P2 --> P3 --> P4
+
+  classDef ph fill:#10151f,stroke:#2ee6c4,color:#e8eef7;
+  class P1,P2,P3,P4 ph;
+</pre>
+      </div>
+      <div class="grid g3" style="margin-top:22px">
+        <div class="card" data-reveal><span class="tag">Single-node</span><h3>~4 vCPU · 8–16 GB RAM</h3><p>Kichik park (&lt;100 agent) uchun Wazuh manager + indexer + dashboard bitta serverda.</p></div>
+        <div class="card" data-reveal><span class="tag">Agent</span><h3>~35 MB RAM / server</h3><p>Yengil agent, RHEL repo orqali yoki Ansible bilan ommaviy o'rnatish.</p></div>
+        <div class="card" data-reveal><span class="tag">DefectDojo</span><h3>~2 vCPU · 4 GB RAM</h3><p>Django + Postgres + Redis. Faza 2'da qo'shiladi.</p></div>
+      </div>
+      <div class="note" data-reveal><span class="lbl">Eslatma</span><p>Resurs raqamlari boshlang'ich baho — rasmiy Wazuh deployment hujjatiga ko'ra yakuniy o'lchamlanadi.</p></div>
+    </div>
+  </section>
+
+  <!-- 10 — DAILY REPORT -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 09</span> Kunlik Hisobot</div>
+      <h2 data-reveal>Har ertalab pochtangizda</h2>
+      <div class="two-col">
+        <div>
+          <ul class="clean">
+            <li data-reveal><b>Wazuh native hisobot</b> — alert xulosalarini email orqali yuboradi.</li>
+            <li data-reveal><b>DefectDojo rejalashtirilgan hisobot</b> — trend va dedup bilan batafsil.</li>
+            <li data-reveal><b>Telegram integratsiyasi</b> — mavjud bot infratuzilmasi orqali tezkor yetkazish.</li>
+            <li data-reveal><b>Severity bo'yicha</b> — Critical → High → Medium ranglar bilan ajratilgan.</li>
+          </ul>
+        </div>
+        <div data-reveal>
+          <div class="report-mock">
+            <div class="bar"><i></i><i></i><i></i><span style="margin-left:10px;color:var(--dim);font-size:12px;display:inline-flex;align-items:center;gap:6px"><span class="material-symbols-outlined" style="font-size:15px;color:var(--accent)">lock</span> TIZIM · kunlik hisobot · 2026-05-29</span></div>
+            <div class="body">
+              <span class="ln g">════════════════════════════</span>
+              <span class="ln"><b>Jami zaiflik:</b> <span class="a">147</span> (kecha 152 ↓5)</span>
+              <span class="ln g">────────────────────────────</span>
+              <span class="ln"><span class="c">● CRITICAL</span> ......... <b>3</b></span>
+              <span class="ln"><span class="h">● HIGH</span> ............. <b>21</b></span>
+              <span class="ln"><span class="m">● MEDIUM</span> ........... <b>58</b></span>
+              <span class="ln g">────────────────────────────</span>
+              <span class="ln"><span class="c">CVE-2025-XXXXX</span> openssl</span>
+              <span class="ln g">  → web-01 · backend-img</span>
+              <span class="ln"><span class="h">CVE-2025-YYYYY</span> nginx</span>
+              <span class="ln g">  → lab-runner · 2 image</span>
+              <span class="ln g">════════════════════════════</span>
+              <span class="ln a">↗ to'liq panel: wazuh.internal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — RISKS / NOTES -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 10</span> Diqqat Nuqtalari</div>
+      <h2 data-reveal>Oldindan bilingan <span class="em">tuzoqlar</span></h2>
+      <div class="grid g2">
+        <div class="card" data-reveal><span class="tag">Versiya</span><h3>Wazuh 4.8 (2024-06) qayta yozildi</h3><p>Zaiflik aniqlash dvigateli tubdan o'zgardi — eski qo'llanmalar ishlamaydi. Biz yangi CTI-asoslangan arxitekturani quramiz.</p></div>
+        <div class="card" data-reveal><span class="tag">Feed migratsiyasi</span><h3>OVAL v2 → CSAF / VEX</h3><p>Red Hat eski formatdan voz kechmoqda (RHEL 10+ uchun chiqarilmaydi). OVAL'ga qattiq bog'liq toollardan qochamiz.</p></div>
+        <div class="card" data-reveal><span class="tag">Trivy</span><h3>Layer flatten = false-positive</h3><p>Birlashtirilgan image fayl tizimini emas, asl image tag'larini skanlash kerak — aks holda noto'g'ri aniqlash.</p></div>
+        <div class="card" data-reveal><span class="tag">Dedup</span><h3>Skaner kelishmovchiligi</h3><p>Wazuh va Trivy bir CVE'ni turlicha ko'rsatishi mumkin (backport). DefectDojo'da dedup strategiyasi shart — alert charchog'ining oldini olamiz.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 — ROADMAP gantt -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 11</span> Yo'l Xaritasi</div>
+      <h2 data-reveal>Taxminiy reja — <span class="em">~3</span> hafta</h2>
+      <div class="diagram" data-reveal>
+<pre class="mermaid">
+gantt
+  dateFormat YYYY-MM-DD
+  axisFormat %d-%b
+  todayMarker off
+  section Faza 1 · Minimal
+  Wazuh single-node setup       :a1, 2026-06-02, 4d
+  Agent rollout (serverlar)     :a2, after a1, 3d
+  Trivy cron + birinchi hisobot :a3, after a2, 2d
+  section Faza 2 · Jamlash
+  DefectDojo o'rnatish          :b1, after a3, 3d
+  Trivy/Grype -> DefectDojo     :b2, after b1, 3d
+  section Faza 3 · Compliance
+  OpenSCAP CIS audit            :c1, after b2, 4d
+  section Faza 4 · Avtomatika
+  Telegram alert + hisobot      :d1, after c1, 3d
+</pre>
+      </div>
+      <p class="lead" data-reveal style="margin-top:8px">Faza 1 yakunida tizim allaqachon ishlaydi va birinchi kunlik hisobotni yuboradi. Keyingi fazalar uni boyitadi.</p>
+    </div>
+  </section>
+
+  <!-- 13 — SUMMARY / ASK -->
+  <section class="slide">
+    <div class="wrap">
+      <div class="kick"><span class="n">// 12</span> Xulosa</div>
+      <h2 data-reveal>Tavsiya va <span class="em">keyingi qadam</span></h2>
+      <div class="two-col">
+        <div>
+          <ul class="clean">
+            <li data-reveal><b>Stek:</b> Wazuh (markaz) + Trivy (konteyner/kod) + DefectDojo (jamlash).</li>
+            <li data-reveal><b>Xarajat:</b> litsenziya 0 — faqat bitta server resursi va ishlab chiqish vaqti.</li>
+            <li data-reveal><b>Natija:</b> har kuni avtomatik xavfsizlik hisoboti + markaziy dashboard + trend.</li>
+            <li data-reveal><b>Vaqt:</b> Faza 1 ishlaydigan tizim — taxminan 1 hafta.</li>
+          </ul>
+          <div style="margin-top:30px;display:flex;gap:12px;flex-wrap:wrap" data-reveal>
+            <span class="pill ok">Ochiq kodli</span>
+            <span class="pill ok">Self-hosted</span>
+            <span class="pill ok">RHEL-moslangan</span>
+            <span class="pill warn">Rahbariyat tasdig'i kerak</span>
+          </div>
+        </div>
+        <div data-reveal>
+          <div class="card" style="padding:30px;text-align:center;border-color:rgba(46,230,196,.3)">
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;margin-bottom:18px">So'rov</div>
+            <div style="font-family:var(--disp);font-size:24px;font-weight:600;line-height:1.2;color:var(--ink)">TIZIM Faza 1'ni<br/>boshlashga ruxsat</div>
+            <p style="color:var(--dim);font-size:14px;font-weight:300;margin-top:16px">Bitta server ajratilsa, bir hafta ichida ishlaydigan demo va birinchi kunlik hisobot tayyor bo'ladi.</p>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:46px;font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.06em" data-reveal>
+        TIZIM · Ichki Xavfsizlik Monitoring Platformasi · 2026-05-29 — <span style="color:var(--accent)">rahmat</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad:false,
+    securityLevel:"loose",
+    theme:"base",
+    themeVariables:{
+      fontFamily:"'IBM Plex Mono', monospace",
+      fontSize:"14px",
+      background:"#10151f",
+      primaryColor:"#141b27",
+      primaryBorderColor:"#2ee6c4",
+      primaryTextColor:"#e8eef7",
+      secondaryColor:"#161d29",
+      tertiaryColor:"#0b0f17",
+      lineColor:"#6b7888",
+      textColor:"#c8d4e2",
+      mainBkg:"#141b27",
+      nodeBorder:"#2ee6c4",
+      clusterBkg:"rgba(46,230,196,.04)",
+      clusterBorder:"rgba(46,230,196,.25)",
+      titleColor:"#e8eef7",
+      edgeLabelBackground:"#10151f",
+      actorBkg:"#141b27",
+      actorBorder:"#2ee6c4",
+      actorTextColor:"#e8eef7",
+      actorLineColor:"#6b7888",
+      signalColor:"#9aa8ba",
+      signalTextColor:"#c8d4e2",
+      labelBoxBkgColor:"#141b27",
+      labelBoxBorderColor:"#2ee6c4",
+      labelTextColor:"#e8eef7",
+      loopTextColor:"#c8d4e2",
+      noteBkgColor:"#1a2230",
+      noteBorderColor:"#5ab2ff",
+      noteTextColor:"#e8eef7",
+      sectionBkgColor:"rgba(46,230,196,.06)",
+      altSectionBkgColor:"rgba(90,178,255,.05)",
+      sectionBkgColor2:"rgba(255,206,107,.05)",
+      taskBkgColor:"#13b99c",
+      taskBorderColor:"#2ee6c4",
+      taskTextColor:"#07090d",
+      taskTextDarkColor:"#07090d",
+      taskTextOutsideColor:"#c8d4e2",
+      activeTaskBkgColor:"#2ee6c4",
+      activeTaskBorderColor:"#2ee6c4",
+      gridColor:"rgba(255,255,255,.1)",
+      doneTaskBkgColor:"#3a4658",
+      doneTaskBorderColor:"#6b7888",
+      critBkgColor:"#ff3b5c",
+      todayLineColor:"#ffce6b"
+    }
+  });
+  try{ await mermaid.run({querySelector:".mermaid"}); }catch(e){ console.error(e); }
+
+  /* ---------- deck navigation ---------- */
+  const deck=document.getElementById("deck");
+  const slides=[...document.querySelectorAll(".slide")];
+  const fill=document.getElementById("fill");
+  const cur=document.getElementById("cur");
+  const tot=document.getElementById("tot");
+  const dotsBox=document.getElementById("dots");
+  let idx=0;
+  tot.textContent=String(slides.length).padStart(2,"0");
+
+  slides.forEach((s,i)=>{
+    const b=document.createElement("button");
+    b.setAttribute("aria-label","Slayd "+(i+1));
+    b.addEventListener("click",()=>go(i));
+    dotsBox.appendChild(b);
+  });
+  const dots=[...dotsBox.children];
+
+  function setActive(i){
+    idx=i;
+    cur.textContent=String(i+1).padStart(2,"0");
+    fill.style.width=((i+1)/slides.length*100)+"%";
+    dots.forEach((d,k)=>d.classList.toggle("active",k===i));
+    slides.forEach((s,k)=>s.classList.toggle("is-active",k===i));
+    // staggered reveal
+    const active=slides[i];
+    const rev=active.querySelectorAll("[data-reveal]");
+    rev.forEach((el,k)=>{ el.style.transitionDelay=(0.08+k*0.07)+"s"; });
+  }
+  function go(i){
+    i=Math.max(0,Math.min(slides.length-1,i));
+    slides[i].scrollIntoView({behavior:"smooth"});
+  }
+
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ setActive(slides.indexOf(e.target)); } });
+  },{threshold:0.55});
+  slides.forEach(s=>io.observe(s));
+
+  document.addEventListener("keydown",(e)=>{
+    if(["ArrowDown","ArrowRight"," ","PageDown"].includes(e.key)){e.preventDefault();go(idx+1);}
+    else if(["ArrowUp","ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();go(idx-1);}
+    else if(e.key==="Home"){e.preventDefault();go(0);}
+    else if(e.key==="End"){e.preventDefault();go(slides.length-1);}
+    else if(e.key==="f"||e.key==="F"){ if(!document.fullscreenElement)document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+  });
+
+  setActive(0);
+</script>
+</body>
+</html>
