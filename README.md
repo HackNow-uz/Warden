@@ -24,7 +24,8 @@ bash test/e2e.sh                        # end-to-end smoke test
 - `docs/` — spec, arxitektura, prezentatsiya
 
 ## Hujjatlar
-- Arxitektura + diagrammalar + **production deploy**: [`docs/architecture.md`](docs/architecture.md)
+- **Production readiness + deploy runbook + checklist**: [`docs/PROD-READINESS.md`](docs/PROD-READINESS.md)
+- Arxitektura + diagrammalar: [`docs/architecture.md`](docs/architecture.md)
 - To'liq spetsifikatsiya: [`docs/specs/2026-05-29-tizim-design.md`](docs/specs/2026-05-29-tizim-design.md)
 - Implementatsiya rejasi: [`docs/plans/2026-05-29-tizim-build.md`](docs/plans/2026-05-29-tizim-build.md)
 - Rahbariyat taqdimoti: [`docs/prezentatsiya.html`](docs/prezentatsiya.html)

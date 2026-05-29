@@ -106,6 +106,10 @@ bash test/e2e.sh
 ⚠️ To'liq stek ~10–12 GB RAM. Kam RAM'da Wazuh va DefectDojo navbatma-navbat sinaladi.
 
 ### Production (RHEL target server)
+
+> To'liq runbook, hardening holati va checklist: [`PROD-READINESS.md`](PROD-READINESS.md).
+> Fresh deploy: `bash scripts/bootstrap-central.sh` (parol rotatsiya + telegram + certs avtomatik).
+
 1. **Maxfiy kalitlar:** `compose/defectdojo/.env` va `compose/.env`'da barcha
    `CHANGE_ME` / bo'sh qiymatlarni real qiymatlar bilan to'ldiring
    (`openssl rand -base64 24`, `python -c 'import secrets;print(secrets.token_urlsafe(50))'`).
@@ -129,7 +133,8 @@ bash test/e2e.sh
 | Ansible ro'llari | `ansible-playbook --syntax-check` | ✅ PASS |
 | Skriptlar | `bash -n` | ✅ PASS |
 | Telegram integ. | `py_compile` | ✅ VALID |
-| To'liq live stek (Wazuh+DD birga) | `docker compose up` + e2e | ⏸ deploy target'da (lokal 7 GB RAM yetmadi) |
+| To'liq live stek (Wazuh+DD+orchestrator) | prod serverda e2e | ✅ ishladi: 1662 topilma, HTML hisobot gmail'ga, agent enroll |
+| Production hardening (parol/telegram/tarmoq/retention/backup/CI) | repo + skriptlar | ✅ yopildi (PROD-READINESS.md) |
 
 ## Xavf va e'tibor (research'dan)
 
