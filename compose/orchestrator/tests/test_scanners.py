@@ -31,10 +31,12 @@ def test_parse_findings_handles_trivy_and_grype():
         {"scan_type": "Anchore Grype", "target": "nginx:1.27", "raw": GRYPE_JSON},
     ]
     findings = parse_findings(results)
-    assert {"cve": "CVE-X", "severity": "High", "package": "openssl",
-            "location": "nginx:1.27"} in findings
-    assert {"cve": "CVE-Y", "severity": "Critical", "package": "nginx",
-            "location": "nginx:1.27"} in findings
+    trivy = [f for f in findings if f["source"] == "Trivy"][0]
+    assert trivy["cve"] == "CVE-X" and trivy["severity"] == "High"
+    assert trivy["package"] == "openssl" and trivy["location"] == "nginx:1.27"
+    grype = [f for f in findings if f["source"] == "Grype"][0]
+    assert grype["cve"] == "CVE-Y" and grype["severity"] == "Critical"
+    assert grype["package"] == "nginx"
     assert len(findings) == 2
 
 
