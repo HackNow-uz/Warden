@@ -1,13 +1,20 @@
 FROM python:3.12-slim
 
+# pipe'lar yarim-yuklashda fail-closed bo'lsin
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         curl ca-certificates cron git tar gzip && rm -rf /var/lib/apt/lists/*
 
 # Skanerlar — pinned (reproducible build)
-# Trivy: to'g'ridan-to'g'ri GitHub release tarball (install.sh redirect endpoint
-# eski versiyalar uchun 404 qaytaradi — shuning uchun ishonchli direct download)
-RUN curl -fsSL https://github.com/aquasecurity/trivy/releases/download/v0.70.0/trivy_0.70.0_Linux-64bit.tar.gz \
-      | tar xz -C /usr/local/bin trivy
+# Trivy: GitHub release tarball + SHA256 integrity tekshiruvi (install.sh redirect
+# endpoint eski versiyalarda 404; checksum tasdig'i supply-chain himoyasi uchun shart)
+RUN set -eux; cd /tmp; \
+    curl -fsSL -O https://github.com/aquasecurity/trivy/releases/download/v0.70.0/trivy_0.70.0_Linux-64bit.tar.gz; \
+    curl -fsSL -O https://github.com/aquasecurity/trivy/releases/download/v0.70.0/trivy_0.70.0_checksums.txt; \
+    grep ' trivy_0.70.0_Linux-64bit.tar.gz$' trivy_0.70.0_checksums.txt | sha256sum -c -; \
+    tar xz -C /usr/local/bin -f trivy_0.70.0_Linux-64bit.tar.gz trivy; \
+    rm -f trivy_0.70.0*
 # Grype + Syft (anchore install skriptlari GitHub release'dan yuklaydi)
 RUN curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
       | sh -s -- -b /usr/local/bin v0.112.0
