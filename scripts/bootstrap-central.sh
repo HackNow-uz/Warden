@@ -17,6 +17,7 @@ fi
 
 echo "[3/7] Wazuh DEMO parollarini rotatsiya (kuchli tasodifiy)..."
 bash scripts/gen-wazuh-secrets.sh
+bash scripts/configure-telegram.sh   # .env'da TELEGRAM_* bo'lsa alertni ulaydi
 
 echo "[4/7] Wazuh sertifikatlari..."
 ( cd compose/wazuh && docker compose -f generate-indexer-certs.yml run --rm generator )
