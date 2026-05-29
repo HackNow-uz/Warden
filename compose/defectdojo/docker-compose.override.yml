@@ -1,0 +1,22 @@
+# TIZIM production override (released-image DefectDojo compose ustiga).
+# - nginx'ni shared `tizim_net`'ga DEKLARATIV ulaydi (orchestrator `nginx:8080` topadi).
+# - resurs limitlari.
+networks:
+  tizim:
+    name: tizim_net
+    external: true
+
+services:
+  nginx:
+    networks: [default, tizim]
+    mem_limit: 512m
+  uwsgi:
+    mem_limit: 1500m
+  celeryworker:
+    mem_limit: 1g
+  celerybeat:
+    mem_limit: 256m
+  postgres:
+    mem_limit: 512m
+  valkey:
+    mem_limit: 256m

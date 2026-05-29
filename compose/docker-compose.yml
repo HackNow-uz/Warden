@@ -6,21 +6,33 @@
 services:
   mailhog:
     image: mailhog/mailhog:v1.0.1
+    restart: unless-stopped
     ports:
-      - "8025:8025"   # web UI
+      - "127.0.0.1:8025:8025"   # web UI — faqat localhost (lokal sinov uchun)
+    mem_limit: 128m
     networks: [tizim]
 
   orchestrator:
     build: ./orchestrator
+    restart: unless-stopped
     env_file: .env
     volumes:
       - ../scanning:/opt/tizim/scanning:ro
       # Wazuh-generated root CA → orchestrator verifies the indexer against it (no -k)
       - ./wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/opt/tizim/certs/root-ca.pem:ro
-      - /var/run/docker.sock:/var/run/docker.sock   # local image pulls
+      # NB: docker.sock MOUNT QILINMAYDI (xavfsizlik). Trivy/Grype image'larni
+      # registry'dan to'g'ridan pull qiladi (host-root kerak emas). Private registry
+      # bo'lsa orchestrator'ga registry kredensiallarini env orqali bering.
     environment:
       IMAGES_FILE: /opt/tizim/scanning/images.txt
       CA_BUNDLE: /opt/tizim/certs/root-ca.pem
+    mem_limit: 1g
+    cpus: 2
+    healthcheck:
+      test: ["CMD-SHELL", "cat /proc/1/comm | grep -q cron || exit 1"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
     networks: [tizim]
 
 networks:
