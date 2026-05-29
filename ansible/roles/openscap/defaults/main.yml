@@ -1,4 +1,5 @@
-# RHEL9/Rocky9 CIS profil
 oscap_profile: "xccdf_org.ssgproject.content_profile_cis"
-oscap_datastream: "/usr/share/xml/scap/ssg/content/ssg-rl9-ds.xml"  # Rocky 9 (Alma: ssg-almalinux9-ds.xml)
+# Bo'sh => role distro bo'yicha avtomatik aniqlaydi (Rocky->rl, Alma->almalinux, RHEL->rhel).
+# Aniq belgilash uchun inventory'da o'rnating, masalan: ssg-rl8-ds.xml
+oscap_datastream: ""
 oscap_report_dir: "/var/log/tizim-scap"

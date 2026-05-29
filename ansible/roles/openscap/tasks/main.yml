@@ -1,3 +1,11 @@
+- name: SCAP datastream'ni distro bo'yicha avtomatik aniqlash (agar belgilanmagan bo'lsa)
+  ansible.builtin.set_fact:
+    oscap_datastream: >-
+      /usr/share/xml/scap/ssg/content/ssg-{{
+        {'Rocky': 'rl', 'AlmaLinux': 'almalinux', 'RedHat': 'rhel', 'CentOS': 'cs'}[ansible_distribution] | default('rl')
+      }}{{ ansible_distribution_major_version }}-ds.xml
+  when: oscap_datastream | length == 0
+
 - name: OpenSCAP va SCAP Security Guide o'rnatish
   ansible.builtin.dnf:
     name:

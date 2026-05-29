@@ -1,5 +1,24 @@
+# TIZIM production inventar shabloni.
+# Nusxa oling: cp inventory.ini.example inventory.ini  (inventory.ini gitignore'da)
+#
+# - Autentifikatsiya: SSH KALIT (parol emas). Maxfiy qiymatlar uchun ansible-vault.
+# - wazuh_manager_ip: agentlar ulanadigan Wazuh MANAGER hostining IP/DNS'i.
+#   Port 1514 (events) va 1515 (enrollment) target'lardan ochiq bo'lishi shart.
+#   Docker-internal "wazuh.manager" EMAS — real tarmoq manzili.
+
 [rhel_targets]
-rocky-target-1 ansible_host=rocky-target-1 ansible_user=root ansible_password=tizimtest ansible_python_interpreter=/usr/bin/python3
+web-01  ansible_host=10.0.0.11
+db-01   ansible_host=10.0.0.12
+# Distro datastream avtomatik aniqlanadi; faqat boshqa major versiyada override kerak:
+app-01  ansible_host=10.0.0.13 oscap_datastream=/usr/share/xml/scap/ssg/content/ssg-rl8-ds.xml
 
 [rhel_targets:vars]
-wazuh_manager_ip=wazuh.manager
+ansible_user=ansible
+ansible_ssh_private_key_file=~/.ssh/tizim_deploy
+ansible_become=true
+ansible_python_interpreter=/usr/bin/python3
+wazuh_manager_ip=10.0.0.5
+
+# Maxfiy qiymatlar kerak bo'lsa (masalan registration paroli):
+#   ansible-vault create group_vars/rhel_targets/vault.yml
+#   ansible-playbook site.yml --ask-vault-pass
