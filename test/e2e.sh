@@ -5,7 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 fail() { echo "❌ $1"; exit 1; }
 pass() { echo "✅ $1"; }
-getenv() { grep -h "^$1=" "$2" 2>/dev/null | cut -d= -f2- | tail -1; }
+getenv() { grep -h "^$1=" "$2" 2>/dev/null | cut -d= -f2- | tail -1 || true; }
 
 DASH_PORT=$(getenv WAZUH_DASHBOARD_PORT compose/.env); DASH_PORT=${DASH_PORT:-8444}
 DD_PORT=$(getenv DD_PORT compose/defectdojo/.env);     DD_PORT=${DD_PORT:-8080}

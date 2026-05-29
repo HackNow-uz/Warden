@@ -7,8 +7,8 @@ cd "$(dirname "$0")/.."
 ENVF=compose/.env
 DAYS="${RETENTION_DAYS:-90}"
 IDX_URL="${INDEXER_URL:-https://localhost:9200}"
-PW=$(grep '^INDEXER_PASSWORD=' "$ENVF" 2>/dev/null | cut -d= -f2-)
-USER=$(grep '^INDEXER_USER=' "$ENVF" 2>/dev/null | cut -d= -f2-); USER="${USER:-admin}"
+PW=$(grep '^INDEXER_PASSWORD=' "$ENVF" 2>/dev/null | cut -d= -f2- || true)
+USER=$(grep '^INDEXER_USER=' "$ENVF" 2>/dev/null | cut -d= -f2- || true); USER="${USER:-admin}"
 CA="${CA_BUNDLE:-compose/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem}"
 CACURL=( --cacert "$CA" ); [ -f "$CA" ] || CACURL=( -k )
 

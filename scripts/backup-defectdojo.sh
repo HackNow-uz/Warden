@@ -8,9 +8,9 @@ KEEP="${BACKUP_KEEP_DAYS:-14}"
 mkdir -p "$OUT"
 TS=$(date +%Y%m%d-%H%M)
 
-DBPASS=$(grep '^DD_DATABASE_PASSWORD=' compose/defectdojo/.env 2>/dev/null | cut -d= -f2-)
-DBUSER=$(grep '^DD_DATABASE_USER=' compose/defectdojo/.env 2>/dev/null | cut -d= -f2-); DBUSER="${DBUSER:-defectdojo}"
-DBNAME=$(grep '^DD_DATABASE_NAME=' compose/defectdojo/.env 2>/dev/null | cut -d= -f2-); DBNAME="${DBNAME:-defectdojo}"
+DBPASS=$(grep '^DD_DATABASE_PASSWORD=' compose/defectdojo/.env 2>/dev/null | cut -d= -f2- || true)
+DBUSER=$(grep '^DD_DATABASE_USER=' compose/defectdojo/.env 2>/dev/null | cut -d= -f2- || true); DBUSER="${DBUSER:-defectdojo}"
+DBNAME=$(grep '^DD_DATABASE_NAME=' compose/defectdojo/.env 2>/dev/null | cut -d= -f2- || true); DBNAME="${DBNAME:-defectdojo}"
 
 PG=$(cd compose/defectdojo && docker compose ps -q postgres)
 [ -n "$PG" ] || { echo "XATO: defectdojo postgres konteyneri topilmadi" >&2; exit 1; }
