@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     smtp_tls: bool = False     # gmail/relay uchun true
 
+    # Dead-man's-switch: muvaffaqiyatli kunlik sikldan keyin shu URL GET qilinadi
+    # (masalan healthchecks.io). Sikl ishlamasa ping kelmaydi -> tashqi alert.
+    heartbeat_url: str = ""
+
     # TLS: do NOT disable verification. For Wazuh self-signed certs, mount the
     # generated root CA and point CA_BUNDLE at it. Empty => use system trust store.
     ca_bundle: str = ""

@@ -11,6 +11,17 @@ def send_telegram(bot_token, chat_id, text):
     return r.status_code == 200
 
 
+def ping_heartbeat(url):
+    """Dead-man's-switch ping (healthchecks.io kabi). Bo'sh URL => no-op."""
+    if not url:
+        return False
+    try:
+        requests.get(url, timeout=10)
+        return True
+    except Exception:  # noqa: BLE001 — heartbeat hech qachon asosiy oqimni buzmasin
+        return False
+
+
 def send_email(host, port, sender, to, subject, body,
                user=None, password=None, use_tls=False, html=None, attachments=None):
     # Parolni cleartext kanalda yubormaslik: auth faqat TLS bilan

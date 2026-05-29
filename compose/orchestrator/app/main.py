@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from app.config import Settings
 from app.wazuh_client import WazuhClient
 from app.report import render_text_report, render_html_summary, render_html_full
-from app.notifiers import send_telegram, send_email
+from app.notifiers import send_telegram, send_email, ping_heartbeat
 
 try:
     from app.scanners import scan_all, parse_findings
@@ -55,6 +55,7 @@ def run_daily():
                    user=s.smtp_user, password=s.smtp_password, use_tls=s.smtp_tls,
                    html=html_body, attachments=[attachment])
         print(text)
+        ping_heartbeat(s.heartbeat_url)   # dead-man's-switch: faqat muvaffaqiyatda
         return 0
     except Exception as exc:  # noqa: BLE001 — convert to alert + non-zero exit
         _alert_failure(s, exc)

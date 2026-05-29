@@ -33,6 +33,9 @@ services:
       interval: 60s
       timeout: 5s
       retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
     networks: [tizim]
 
 networks:

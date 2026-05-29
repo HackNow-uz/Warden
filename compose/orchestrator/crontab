@@ -1,1 +1,1 @@
-0 2 * * * cd /opt/tizim && python -m app.main run-daily >> /var/log/tizim.log 2>&1
+0 2 * * * cd /opt/tizim && python -m app.main run-daily > /proc/1/fd/1 2>/proc/1/fd/2

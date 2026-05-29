@@ -1,5 +1,15 @@
 from unittest.mock import patch, MagicMock
-from app.notifiers import send_telegram, send_email
+from app.notifiers import send_telegram, send_email, ping_heartbeat
+
+
+def test_ping_heartbeat_empty_is_noop():
+    assert ping_heartbeat("") is False
+
+
+@patch("app.notifiers.requests.get")
+def test_ping_heartbeat_gets_url(mock_get):
+    assert ping_heartbeat("https://hc.example/abc") is True
+    assert mock_get.called
 
 
 @patch("app.notifiers.requests.post")
