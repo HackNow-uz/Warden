@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        curl ca-certificates cron git && rm -rf /var/lib/apt/lists/*
+        curl ca-certificates cron git tar gzip && rm -rf /var/lib/apt/lists/*
 
 # Skanerlar — barchasi pinned (reproducible build)
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
