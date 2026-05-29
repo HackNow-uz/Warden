@@ -1,0 +1,1 @@
+0 2 * * * cd /opt/tizim && python -m app.main run-daily >> /var/log/tizim.log 2>&1

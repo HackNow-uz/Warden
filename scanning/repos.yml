@@ -1,0 +1,7 @@
+# Kod repo'lari: ekotizim bo'yicha deps skani (trivy fs / run_trivy_fs).
+# Prod'da haqiqiy repo URL'larini qo'shing. scan_all hozir image'larni skanlaydi;
+# repo skani run_trivy_fs orqali (klonlangandan keyin) ishlatiladi.
+repos:
+  - name: example-django
+    url: https://github.com/example/django-app.git
+    ecosystem: pip

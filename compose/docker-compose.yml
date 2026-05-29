@@ -1,0 +1,29 @@
+# TIZIM top-level: orchestrator + mailhog.
+# Wazuh va DefectDojo o'z compose fayllarida (compose/wazuh, compose/defectdojo).
+# Uchala stek `tizim_net` (external) tarmog'ida — bootstrap skripti tarmoqni yaratadi
+# va Wazuh/DefectDojo konteynerlarini unga ulaydi (alias bilan), shunda orchestrator
+# `wazuh.indexer` / `wazuh.manager` / `nginx` nomlari orqali ularga TLS-mos yetadi.
+services:
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "8025:8025"   # web UI
+    networks: [tizim]
+
+  orchestrator:
+    build: ./orchestrator
+    env_file: .env
+    volumes:
+      - ../scanning:/opt/tizim/scanning:ro
+      # Wazuh-generated root CA → orchestrator verifies the indexer against it (no -k)
+      - ./wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem:/opt/tizim/certs/root-ca.pem:ro
+      - /var/run/docker.sock:/var/run/docker.sock   # local image pulls
+    environment:
+      IMAGES_FILE: /opt/tizim/scanning/images.txt
+      CA_BUNDLE: /opt/tizim/certs/root-ca.pem
+    networks: [tizim]
+
+networks:
+  tizim:
+    name: tizim_net
+    external: true
