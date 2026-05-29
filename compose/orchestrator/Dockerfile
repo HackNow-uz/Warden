@@ -3,9 +3,12 @@ FROM python:3.12-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
         curl ca-certificates cron git tar gzip && rm -rf /var/lib/apt/lists/*
 
-# Skanerlar — barchasi pinned (reproducible build)
-RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-      | sh -s -- -b /usr/local/bin v0.56.2
+# Skanerlar — pinned (reproducible build)
+# Trivy: to'g'ridan-to'g'ri GitHub release tarball (install.sh redirect endpoint
+# eski versiyalar uchun 404 qaytaradi — shuning uchun ishonchli direct download)
+RUN curl -fsSL https://github.com/aquasecurity/trivy/releases/download/v0.70.0/trivy_0.70.0_Linux-64bit.tar.gz \
+      | tar xz -C /usr/local/bin trivy
+# Grype + Syft (anchore install skriptlari GitHub release'dan yuklaydi)
 RUN curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
       | sh -s -- -b /usr/local/bin v0.112.0
 RUN curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
