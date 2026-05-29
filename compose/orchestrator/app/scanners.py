@@ -92,15 +92,25 @@ def parse_findings(scan_results):
                         "cve": v.get("VulnerabilityID", ""),
                         "severity": v.get("Severity", "Low").title(),
                         "package": v.get("PkgName", ""),
+                        "installed": v.get("InstalledVersion", ""),
+                        "fixed": v.get("FixedVersion", ""),
+                        "title": v.get("Title", "") or (v.get("Description") or "")[:140],
                         "location": target,
+                        "source": "Trivy",
                     })
         elif res.get("scan_type") == "Anchore Grype":
             for m in data.get("matches", []) or []:
                 vuln = m.get("vulnerability", {})
+                art = m.get("artifact", {})
+                fix = vuln.get("fix", {}) or {}
                 out.append({
                     "cve": vuln.get("id", ""),
                     "severity": vuln.get("severity", "Low").title(),
-                    "package": m.get("artifact", {}).get("name", ""),
+                    "package": art.get("name", ""),
+                    "installed": art.get("version", ""),
+                    "fixed": ", ".join(fix.get("versions", []) or []),
+                    "title": (vuln.get("description") or "")[:140],
                     "location": target,
+                    "source": "Grype",
                 })
     return out

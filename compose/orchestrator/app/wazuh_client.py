@@ -24,10 +24,15 @@ class WazuhClient:
         for hit in r.json().get("hits", {}).get("hits", []):
             src = hit.get("_source", {})
             vuln = src.get("vulnerability", {})
+            pkg = src.get("package", {})
             out.append({
                 "cve": vuln.get("id", ""),
                 "severity": vuln.get("severity", "Low"),
-                "package": src.get("package", {}).get("name", ""),
+                "package": pkg.get("name", ""),
+                "installed": pkg.get("version", ""),
+                "fixed": vuln.get("condition", ""),
+                "title": vuln.get("description", ""),
                 "location": src.get("agent", {}).get("name", ""),
+                "source": "Wazuh",
             })
         return out

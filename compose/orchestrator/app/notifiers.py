@@ -12,7 +12,7 @@ def send_telegram(bot_token, chat_id, text):
 
 
 def send_email(host, port, sender, to, subject, body,
-               user=None, password=None, use_tls=False):
+               user=None, password=None, use_tls=False, html=None, attachments=None):
     # Parolni cleartext kanalda yubormaslik: auth faqat TLS bilan
     if (user or password) and not use_tls:
         raise ValueError("SMTP autentifikatsiyasi use_tls=True talab qiladi")
@@ -20,7 +20,14 @@ def send_email(host, port, sender, to, subject, body,
     msg["From"] = sender
     msg["To"] = to
     msg["Subject"] = subject
-    msg.set_content(body)
+    msg.set_content(body)                       # text/plain fallback
+    if html:
+        msg.add_alternative(html, subtype="html")
+    for fname, content, mime in (attachments or []):
+        maintype, _, subtype = mime.partition("/")
+        data = content.encode() if isinstance(content, str) else content
+        msg.add_attachment(data, maintype=maintype, subtype=subtype or "octet-stream",
+                           filename=fname)
     with smtplib.SMTP(host, port, timeout=30) as s:
         if use_tls:
             s.starttls()
