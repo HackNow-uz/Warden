@@ -1,0 +1,52 @@
+name: TIZIM CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Orchestrator unit testlar (pytest)
+        working-directory: compose/orchestrator
+        run: |
+          pip install -r requirements.txt
+          python -m pytest tests/ -v
+
+      - name: tizim_net (external network) tayyorlash
+        run: docker network create tizim_net || true
+
+      - name: Wazuh compose validatsiya (+override)
+        working-directory: compose/wazuh
+        run: docker compose config --quiet
+
+      - name: DefectDojo compose validatsiya (+override)
+        working-directory: compose/defectdojo
+        env:
+          DD_SECRET_KEY: ci-dummy-secret
+          DD_CREDENTIAL_AES_256_KEY: ci-dummy-aes
+          DD_DATABASE_PASSWORD: ci-dummy-db
+          DD_DATABASE_URL: postgresql://defectdojo:ci-dummy-db@postgres:5432/defectdojo
+        run: docker compose config --quiet
+
+      - name: Top compose validatsiya
+        working-directory: compose
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+
+      - name: Ansible syntax-check
+        run: |
+          pip install ansible-core
+          cp ansible/inventory.ini.example ansible/inventory.ini
+          ansible-playbook -i ansible/inventory.ini --syntax-check ansible/site.yml
+
+      - name: Skriptlar sintaksisi (bash -n)
+        run: bash -n scripts/*.sh test/e2e.sh
