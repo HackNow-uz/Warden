@@ -14,9 +14,12 @@ SMTP_HOST=$(getenv SMTP_HOST compose/.env);            SMTP_HOST=${SMTP_HOST:-ma
 
 echo "== TIZIM E2E =="
 
-# 1. Wazuh dashboard (localhost)
+# 1. Wazuh dashboard (localhost) — 302 = login redirect = sog'lom
 code=$(curl -sk -o /dev/null -w "%{http_code}" "https://127.0.0.1:${DASH_PORT}" || true)
-[ "$code" = "200" ] && pass "Wazuh dashboard ($code)" || fail "dashboard $code"
+case "$code" in
+  200|302) pass "Wazuh dashboard ($code)";;
+  *) fail "dashboard $code";;
+esac
 
 # 2. DefectDojo (localhost)
 code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${DD_PORT}/login" || true)
