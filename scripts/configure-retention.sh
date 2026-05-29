@@ -11,8 +11,8 @@ DAYS="${RETENTION_DAYS:-90}"
 IDX_HOST="${INDEXER_HOST:-wazuh.indexer}"
 IDX_PORT="${INDEXER_PORT:-9200}"
 HOST_IP="${INDEXER_HOST_IP:-127.0.0.1}"
-PW=$(grep '^INDEXER_PASSWORD=' "$ENVF" 2>/dev/null | cut -d= -f2- || true)
-USER=$(grep '^INDEXER_USER=' "$ENVF" 2>/dev/null | cut -d= -f2- || true); USER="${USER:-admin}"
+PW=$(grep '^INDEXER_PASSWORD=' "$ENVF" 2>/dev/null | head -1 | cut -d= -f2- || true)
+IDX_USER=$(grep '^INDEXER_USER=' "$ENVF" 2>/dev/null | head -1 | cut -d= -f2- || true); IDX_USER="${IDX_USER:-admin}"
 CA="${CA_BUNDLE:-compose/wazuh/config/wazuh_indexer_ssl_certs/root-ca.pem}"
 CACURL=( --cacert "$CA" --resolve "${IDX_HOST}:${IDX_PORT}:${HOST_IP}" )
 [ -f "$CA" ] || CACURL=( -k --resolve "${IDX_HOST}:${IDX_PORT}:${HOST_IP}" )
@@ -34,7 +34,7 @@ read -r -d '' POLICY <<JSON || true
 JSON
 
 echo "ISM policy 'tizim-retention' (${DAYS} kun) o'rnatilmoqda..."
-curl -s "${CACURL[@]}" -u "${USER}:${PW}" -X PUT \
+curl -s "${CACURL[@]}" -u "${IDX_USER}:${PW}" -X PUT \
   "${IDX_URL}/_plugins/_ism/policies/tizim-retention" \
   -H 'Content-Type: application/json' -d "$POLICY" -w "\nHTTP %{http_code}\n" | tail -3
 echo "Eslatma: policy faqat YANGI indekslarga avto-biriktiriladi (ism_template)."
