@@ -1,0 +1,2 @@
+wazuh_agent_version: "4.9.2-1"
+wazuh_manager_ip: "wazuh.manager"

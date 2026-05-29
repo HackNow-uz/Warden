@@ -1,0 +1,4 @@
+# RHEL9/Rocky9 CIS profil
+oscap_profile: "xccdf_org.ssgproject.content_profile_cis"
+oscap_datastream: "/usr/share/xml/scap/ssg/content/ssg-rl9-ds.xml"  # Rocky 9 (Alma: ssg-almalinux9-ds.xml)
+oscap_report_dir: "/var/log/tizim-scap"

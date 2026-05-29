@@ -1,0 +1,55 @@
+- name: OpenSCAP va SCAP Security Guide o'rnatish
+  ansible.builtin.dnf:
+    name:
+      - openscap-scanner
+      - scap-security-guide
+    state: present
+
+- name: hisobot katalogini yaratish
+  ansible.builtin.file:
+    path: "{{ oscap_report_dir }}"
+    state: directory
+    mode: "0750"
+
+- name: CIS skanini bajarish (XCCDF, configuration compliance)
+  ansible.builtin.command: >
+    oscap xccdf eval
+    --profile {{ oscap_profile }}
+    --results {{ oscap_report_dir }}/results.xml
+    --report {{ oscap_report_dir }}/report.html
+    {{ oscap_datastream }}
+  register: oscap_run
+  failed_when: oscap_run.rc not in [0, 2]   # 2 = ba'zi qoidalar fail (normal)
+  changed_when: false
+
+- name: kunlik CIS skan uchun systemd service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/tizim-scap.service
+    content: |
+      [Unit]
+      Description=TIZIM CIS SCAP scan
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/bin/oscap xccdf eval --profile {{ oscap_profile }} --results {{ oscap_report_dir }}/results.xml --report {{ oscap_report_dir }}/report.html {{ oscap_datastream }}
+      SuccessExitStatus=0 2
+    mode: "0644"
+
+- name: kunlik CIS skan uchun systemd timer
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/tizim-scap.timer
+    content: |
+      [Unit]
+      Description=TIZIM CIS SCAP kunlik
+      [Timer]
+      OnCalendar=*-*-* 01:30:00
+      Persistent=true
+      [Install]
+      WantedBy=timers.target
+    mode: "0644"
+
+- name: timer'ni yoqish
+  ansible.builtin.systemd:
+    name: tizim-scap.timer
+    enabled: true
+    state: started
+    daemon_reload: true

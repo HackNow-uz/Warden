@@ -1,0 +1,5 @@
+[rhel_targets]
+rocky-target-1 ansible_host=rocky-target-1 ansible_user=root ansible_password=tizimtest ansible_python_interpreter=/usr/bin/python3
+
+[rhel_targets:vars]
+wazuh_manager_ip=wazuh.manager

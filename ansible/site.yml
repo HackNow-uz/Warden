@@ -1,0 +1,6 @@
+- name: RHEL target'larga Wazuh agent va OpenSCAP
+  hosts: rhel_targets
+  become: true
+  roles:
+    - wazuh_agent
+    - openscap
