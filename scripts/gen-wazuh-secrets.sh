@@ -26,8 +26,11 @@ if ! grep -q "SecretPassword" "$DC"; then
 fi
 
 gen() { openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 28; }
-NEW_ADMIN=$(gen); NEW_API=$(gen); NEW_KIBANA=$(gen)
-echo "[1/4] Kuchli parollar generatsiya qilindi (admin, API, kibanaserver)."
+# Wazuh API paroli MURAKKABLIK talab qiladi: katta + kichik + raqam + maxsus belgi.
+# Maxsus belgilar sed-replacement va .env uchun xavfsiz tanlangan (@ _ -).
+gen_api() { echo "Aa1$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 22)@_-"; }
+NEW_ADMIN=$(gen); NEW_KIBANA=$(gen); NEW_API=$(gen_api)
+echo "[1/4] Kuchli parollar generatsiya qilindi (admin, API[murakkab], kibanaserver)."
 
 hash_pw() {
   docker run --rm wazuh/wazuh-indexer:"$WZVER" \
