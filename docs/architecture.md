@@ -4,7 +4,7 @@ Self-hosted, ochiq kodli ichki xavfsizlik monitoring platformasi. To'rt o'lcham
 (OS paket CVE · Docker image · kod bog'liqlik · CIS/SCAP) bitta markazda
 jamlanadi va har kuni avtomatik hisobot yuboriladi.
 
-> Vizual taqdimot (rahbariyat uchun): [`prezentatsiya.html`](prezentatsiya.html)
+> Vizual taqdimot (rahbariyat uchun): [`index.html`](index.html) · jonli: https://hacknow-uz.github.io/Warden/
 > To'liq spetsifikatsiya: [`specs/2026-05-29-tizim-design.md`](specs/2026-05-29-tizim-design.md)
 
 ## Komponentlar

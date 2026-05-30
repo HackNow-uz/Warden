@@ -9,6 +9,8 @@
 ![Ansible](https://img.shields.io/badge/Ansible-IaC-EE0000?logo=ansible&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-20%20passing-brightgreen)
 
+### 📊 [**Live presentation →** hacknow-uz.github.io/Warden](https://hacknow-uz.github.io/Warden/)
+
 Warden continuously watches every server, container image, and code dependency across your
 infrastructure for known vulnerabilities, runs CIS/SCAP compliance checks, aggregates everything
 into one dashboard, and emails a full security report every day — all from open-source components,
