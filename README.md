@@ -1,15 +1,21 @@
-# 🛡️ Warden
+<p align="center">
+  <img src="docs/logo.png" alt="Warden" width="140" />
+</p>
 
-**Self-hosted, open-source vulnerability monitoring & daily security reporting for RHEL-family fleets.**
+<h1 align="center">Warden</h1>
 
-[![CI](https://github.com/HackNow-uz/Warden/actions/workflows/ci.yml/badge.svg)](https://github.com/HackNow-uz/Warden/actions/workflows/ci.yml)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
-![Ansible](https://img.shields.io/badge/Ansible-IaC-EE0000?logo=ansible&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-20%20passing-brightgreen)
+<p align="center"><b>Self-hosted, open-source vulnerability monitoring & daily security reporting for RHEL-family fleets.</b></p>
 
-### 📊 [**Live presentation →** hacknow-uz.github.io/Warden](https://hacknow-uz.github.io/Warden/)
+<p align="center">
+  <a href="https://github.com/HackNow-uz/Warden/actions/workflows/ci.yml"><img src="https://github.com/HackNow-uz/Warden/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License" />
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/Ansible-IaC-EE0000?logo=ansible&logoColor=white" alt="Ansible" />
+  <img src="https://img.shields.io/badge/tests-20%20passing-brightgreen" alt="Tests" />
+</p>
+
+<p align="center">📊 <a href="https://hacknow-uz.github.io/Warden/"><b>Live presentation →</b> hacknow-uz.github.io/Warden</a></p>
 
 Warden continuously watches every server, container image, and code dependency across your
 infrastructure for known vulnerabilities, runs CIS/SCAP compliance checks, aggregates everything
