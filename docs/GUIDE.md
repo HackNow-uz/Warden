@@ -86,18 +86,22 @@ orchestrator ularga TLS-mos nomlar bilan yetadi, restart'dan keyin ham saqlanadi
 
 ---
 
-## 4. O'rnatish (lokal sinov)
+## 4. O'rnatish (lokal sinov) — bitta buyruq
 
 ```bash
-git clone <tizim-repo> && cd Warden
-cp compose/.env.example compose/.env
-cp compose/defectdojo/.env.example compose/defectdojo/.env
-# DefectDojo majburiy kalitlarini to'ldiring (6-bo'lim)
-
-bash scripts/bootstrap-central.sh    # parol rotatsiya + certs + stek
-bash scripts/configure-retention.sh  # ISM retention (indexer ko'tarilgach)
+git clone https://github.com/HackNow-uz/Warden && cd Warden
+./setup.sh                           # preflight + sirlarni avto-generatsiya + bootstrap
 bash test/e2e.sh                     # smoke test
 ```
+
+`setup.sh` quyidagilarni avtomatik qiladi:
+- **Preflight:** docker/compose, RAM (~12 GB), `vm.max_map_count` (≥262144), bo'sh disk, port to'qnashuvi — tekshiradi va aniq maslahat beradi
+- **`.env` fayllarni yaratadi** va **DefectDojo majburiy kalitlarini (`DD_SECRET_KEY`,
+  `DD_CREDENTIAL_AES_256_KEY`, `DD_DATABASE_PASSWORD`+URL) o'zi generatsiya qiladi** — qo'lda tahrir kerak emas
+- So'ng `bootstrap-central.sh` (Wazuh demo parol rotatsiya + certs + stek)
+
+Faqat tekshiruv (bootstrap'siz): `./setup.sh --check`.
+Keyin ixtiyoriy: `bash scripts/configure-retention.sh` (indexer retention).
 
 Dashboardlarga kirish (localhost-bound) — SSH tunnel orqali:
 ```bash
@@ -114,22 +118,18 @@ ssh -L 8444:127.0.0.1:8444 -L 8888:127.0.0.1:8888 user@host
 To'liq runbook va checklist: **[PROD-READINESS.md](PROD-READINESS.md)**. Qisqacha:
 
 ```bash
-# 1. Repo + env
-cp compose/.env.example compose/.env
-cp compose/defectdojo/.env.example compose/defectdojo/.env
+# 1. O'rnatish (sirlarni avto-generatsiya + bootstrap)
+./setup.sh
 
-# 2. DefectDojo MAJBURIY kalitlari (compose/defectdojo/.env):
-python -c 'import secrets;print(secrets.token_urlsafe(50))'   # DD_SECRET_KEY
-openssl rand -base64 24                                        # DD_CREDENTIAL_AES_256_KEY
-openssl rand -base64 24                                        # DD_DATABASE_PASSWORD (+ DD_DATABASE_URL)
+# 2. (ixtiyoriy) compose/.env: TELEGRAM_BOT_TOKEN/CHAT_ID, HEARTBEAT_URL, real SMTP
+#    Bootstrap'dan oldin to'ldirilsa, Telegram alert ham ulanadi.
 
-# 3. (ixtiyoriy) compose/.env: TELEGRAM_BOT_TOKEN/CHAT_ID, HEARTBEAT_URL, real SMTP
-
-# 4. Bootstrap (Wazuh demo parollarini AVTOMATIK rotatsiya qiladi)
-bash scripts/bootstrap-central.sh
-
-# 5. Retention + 6. Agentlar + 7. Backup cron — PROD-READINESS.md'ga qarang
+# 3. Retention + 4. Agentlar + 5. Backup cron — PROD-READINESS.md'ga qarang
 ```
+
+> `setup.sh` DefectDojo kalitlarini kuchli tasodifiy qilib o'zi generatsiya qiladi (prod uchun ham mos).
+> O'z kalitlaringizni xohlasangiz, bootstrap'dan oldin `compose/defectdojo/.env`'da to'ldiring
+> (setup faqat **bo'sh** qiymatlarni to'ldiradi, mavjudini buzmaydi).
 
 Bootstrap avtomatik bajaradi: `tizim_net` → `gen-wazuh-secrets.sh` (parol rotatsiya) →
 `configure-telegram.sh` → certs → Wazuh up → DefectDojo up → orchestrator up.
@@ -213,6 +213,7 @@ curl -sk -H "Authorization: Bearer $TOKEN" "https://127.0.0.1:55000/agents?selec
 
 | Skript | Vazifa |
 |---|---|
+| `setup.sh` | **Bir buyruqli o'rnatish:** preflight + sirlarni avto-generatsiya + bootstrap (`--check` = faqat tekshiruv) |
 | `bootstrap-central.sh` | Markaziy stekni to'liq ko'taradi (parol rotatsiya + telegram + certs + up) |
 | `gen-wazuh-secrets.sh` | Wazuh demo parollarini kuchli tasodifiyga almashtiradi (fresh deploy) |
 | `configure-telegram.sh` | `.env`dagi `TELEGRAM_*`dan Wazuh L12 alert hook_url'ini ulaydi |

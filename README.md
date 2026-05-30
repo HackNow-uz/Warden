@@ -92,15 +92,17 @@ Full diagrams: [`docs/architecture.md`](docs/architecture.md).
 - 📊 **Rich reporting**: HTML report with severity-coded tables, full findings attachment.
 - ♻️ **Operable**: ISM retention, DB backups, log rotation, dead-man's-switch monitoring.
 
-## Quick start (local)
+## Quick start (local) — one command
 
 ```bash
-cp compose/.env.example compose/.env
-cp compose/defectdojo/.env.example compose/defectdojo/.env   # fill required secrets
-bash scripts/bootstrap-central.sh     # rotates passwords + certs + brings up the stack
-bash scripts/configure-retention.sh   # index retention policy
-bash test/e2e.sh                       # end-to-end smoke test
+git clone https://github.com/HackNow-uz/Warden && cd Warden
+./setup.sh            # preflight + auto-generates secrets + brings up the full stack
+bash test/e2e.sh      # end-to-end smoke test
 ```
+`setup.sh` checks Docker / RAM / `vm.max_map_count` / ports, **auto-generates DefectDojo
+secrets** (no manual editing), then bootstraps Wazuh + DefectDojo + orchestrator.
+Just want to verify prerequisites? `./setup.sh --check`. Then optionally:
+`bash scripts/configure-retention.sh` (index retention).
 Access (internal-only) via SSH tunnel:
 ```bash
 ssh -L 8444:127.0.0.1:8444 -L 8888:127.0.0.1:8888 user@host

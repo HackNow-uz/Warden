@@ -49,4 +49,4 @@ jobs:
           ansible-playbook -i ansible/inventory.ini --syntax-check ansible/site.yml
 
       - name: Skriptlar sintaksisi (bash -n)
-        run: bash -n scripts/*.sh test/e2e.sh
+        run: bash -n setup.sh scripts/*.sh test/e2e.sh

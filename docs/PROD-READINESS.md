@@ -31,37 +31,33 @@ operator checklist'ini, deploy runbook'ini va xavfsizlik posturasini bayon qilad
 ## 2. Production deploy runbook (fresh)
 
 ```bash
-# 1. Repo va env
-git clone <tizim-repo> /opt/Warden && cd /opt/Warden
-cp compose/.env.example compose/.env
-cp compose/defectdojo/.env.example compose/defectdojo/.env
+# 1. Repo
+git clone https://github.com/HackNow-uz/Warden /opt/Warden && cd /opt/Warden
 
-# 2. DefectDojo maxfiy kalitlari (MAJBURIY)
-#    compose/defectdojo/.env ichida to'ldiring:
-python -c 'import secrets;print(secrets.token_urlsafe(50))'   # DD_SECRET_KEY
-openssl rand -base64 24                                        # DD_CREDENTIAL_AES_256_KEY
-openssl rand -base64 24                                        # DD_DATABASE_PASSWORD (+ DD_DATABASE_URL'ga moslang)
+# 2. (ixtiyoriy, bootstrap'dan OLDIN) compose/.env: real SMTP + Telegram + heartbeat
+#    SMTP_HOST/PORT/USER/PASSWORD/FROM/TO + SMTP_TLS=true ; TELEGRAM_BOT_TOKEN/CHAT_ID ; HEARTBEAT_URL
+#    (Agar bootstrap'dan oldin to'ldirilsa, Telegram alert ham avtomatik ulanadi.)
 
-# 3. (ixtiyoriy) Telegram + heartbeat — compose/.env:
-#    TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, HEARTBEAT_URL
-#    SMTP (real): SMTP_HOST/PORT/USER/PASSWORD/FROM/TO + SMTP_TLS=true
+# 3. O'rnatish: preflight + DefectDojo sirlarini avto-generatsiya + bootstrap
+./setup.sh
 
-# 4. Markaziy stek (parol rotatsiya + telegram + certs + up — hammasi avtomatik)
-bash scripts/bootstrap-central.sh
-
-# 5. Retention policy (indexer ko'tarilgach)
+# 4. Retention policy (indexer ko'tarilgach)
 RETENTION_DAYS=90 bash scripts/configure-retention.sh
 
-# 6. Agentlar (RHEL serverlar)
+# 5. Agentlar (RHEL serverlar)
 cp ansible/inventory.ini.example ansible/inventory.ini   # real serverlar + SSH kalit
 bash scripts/enroll-agents.sh
 
-# 7. Backup cron (host crontab)
-echo "0 3 * * * cd /opt/Warden && WARDEN_BACKUP_DIR=/var/backups/tizim bash scripts/backup-defectdojo.sh" | crontab -
+# 6. Backup cron (host crontab)
+echo "0 3 * * * cd /opt/Warden && WARDEN_BACKUP_DIR=/var/backups/warden bash scripts/backup-defectdojo.sh" | crontab -
 
-# 8. Tekshiruv
+# 7. Tekshiruv
 bash test/e2e.sh
 ```
+
+> `setup.sh` DefectDojo kalitlarini kuchli tasodifiy qilib generatsiya qiladi. O'z
+> kalitlaringizni qo'ymoqchi bo'lsangiz, `./setup.sh`dan oldin `compose/defectdojo/.env`'ni
+> to'ldiring (setup faqat bo'sh qiymatlarni to'ldiradi).
 
 ## 3. Xavfsizlik posturasi (access / TLS)
 
