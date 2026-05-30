@@ -1,37 +1,122 @@
-# TIZIM — Ichki Xavfsizlik Monitoring Platformasi
+# 🛡️ Warden
 
-Self-hosted, ochiq kodli xavfsizlik monitoring stek: **Wazuh** (markaz) +
-**Trivy/Grype** (konteyner & kod skani) + **DefectDojo** (agregatsiya) +
-**OpenSCAP** (CIS compliance). Har kuni avtomatik xavfsizlik hisoboti.
+**Self-hosted, open-source vulnerability monitoring & daily security reporting for RHEL-family fleets.**
 
-## Tezkor boshlash (lokal sinov)
-```bash
-cp compose/.env.example compose/.env                          # orchestrator sozlamalari
-cp compose/defectdojo/.env.example compose/defectdojo/.env    # MAJBURIY maxfiy kalitlarni to'ldiring
-bash scripts/bootstrap-central.sh      # Wazuh + DefectDojo + orchestrator (tizim_net)
-docker compose -f test/docker-compose.targets.yml up -d       # soxta Rocky agent (sinov)
-bash scripts/enroll-agents.sh          # Ansible: agent + openscap
-bash test/e2e.sh                        # end-to-end smoke test
+[![CI](https://github.com/HackNow-uz/Warden/actions/workflows/ci.yml/badge.svg)](https://github.com/HackNow-uz/Warden/actions/workflows/ci.yml)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Ansible](https://img.shields.io/badge/Ansible-IaC-EE0000?logo=ansible&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-20%20passing-brightgreen)
+
+Warden continuously watches every server, container image, and code dependency across your
+infrastructure for known vulnerabilities, runs CIS/SCAP compliance checks, aggregates everything
+into one dashboard, and emails a full security report every day — all from open-source components,
+wired together with a small, well-tested orchestrator. No SaaS, no per-host licensing.
+
+> Internal codename: **TIZIM** (used for container/network/path identifiers like `tizim_net`).
+
+---
+
+## What it covers
+
+| Dimension | Engine |
+|---|---|
+| 🖥️ **OS package CVEs** (installed RPMs) | Wazuh agent + CTI feed |
+| 🐳 **Docker image vulnerabilities** | Trivy + Grype |
+| 🧩 **Code dependencies** (pip / npm / go.mod) | Trivy filesystem scan |
+| 📋 **CIS Benchmark / SCAP compliance** | OpenSCAP + SSG |
+
+Findings from all sources are aggregated in **DefectDojo** (dedup + trend) and a daily HTML report
+(summary + every Critical inline, full findings as an attachment) is delivered via **email/Telegram**.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph SRV["RHEL / Rocky / Alma servers"]
+    A1["wazuh-agent"]
+    A2["wazuh-agent"]
+  end
+  subgraph CORE["Wazuh — central platform"]
+    M["Manager<br/>Vuln Detection + SCA/CIS"]
+    IDX[("Indexer")]
+    DSH["Dashboard"]
+  end
+  CTI{{"CTI feed<br/>RHEL · Rocky · Alma · NVD"}}
+  subgraph SCAN["Scanners"]
+    T["Trivy"]
+    G["Grype + Syft"]
+  end
+  OR["Orchestrator<br/>(Python, cron 02:00)"]
+  DD[("DefectDojo")]
+  RPT["Daily report<br/>Email / Telegram"]
+
+  A1 --> M
+  A2 --> M
+  CTI --> M
+  M <--> IDX --> DSH
+  OR -->|query| IDX
+  OR --> T --> DD
+  OR --> G --> DD
+  OR --> RPT
+  DD --> RPT
 ```
-⚠️ To'liq stek ~10–12 GB RAM talab qiladi. Kam RAM'da Wazuh va DefectDojo navbatma-navbat.
 
-## Tuzilma
-- `compose/` — markaziy stek (Docker Compose)
-- `ansible/` — RHEL target'larga agent + openscap
-- `scanning/` — skan qilinadigan image/repo ro'yxati
-- `scripts/` — bootstrap, enroll, daily-scan
-- `test/` — lokal e2e (Rocky systemd konteynerlar)
-- `docs/` — spec, arxitektura, prezentatsiya
+Two layers: a **central Docker Compose stack** (Wazuh + DefectDojo + orchestrator) and
+**Ansible roles** that provision `wazuh-agent` + OpenSCAP on RHEL targets.
+Full diagrams: [`docs/architecture.md`](docs/architecture.md).
 
-## Hujjatlar
-- **To'liq qo'llanma (o'rnatish→sozlash→ishlatish→troubleshoot→kengaytirish)**: [`docs/GUIDE.md`](docs/GUIDE.md)
-- **Production readiness + deploy runbook + checklist**: [`docs/PROD-READINESS.md`](docs/PROD-READINESS.md)
-- Arxitektura + diagrammalar: [`docs/architecture.md`](docs/architecture.md)
-- To'liq spetsifikatsiya: [`docs/specs/2026-05-29-tizim-design.md`](docs/specs/2026-05-29-tizim-design.md)
-- Implementatsiya rejasi: [`docs/plans/2026-05-29-tizim-build.md`](docs/plans/2026-05-29-tizim-build.md)
-- Rahbariyat taqdimoti: [`docs/prezentatsiya.html`](docs/prezentatsiya.html)
+## Tech stack
 
-## Test
+`Wazuh 4.9` · `Trivy` · `Grype` · `Syft` · `DefectDojo` · `OpenSCAP` ·
+`Python 3.12` (pytest) · `Docker Compose` · `Ansible` · `GitHub Actions CI`
+
+## Highlights
+
+- 🔁 **Fully automated** daily cycle (cron) — scan → aggregate → report → heartbeat.
+- 🔐 **Security-first**: secrets required (no defaults), TLS verification never disabled,
+  no `docker.sock` mount, internal-only port binding, automated Wazuh password rotation.
+- 🧱 **Infrastructure-as-Code**: declarative networking, resource limits, healthchecks,
+  one-command bootstrap, idempotent scripts.
+- ✅ **Tested**: 20 unit tests, CI validates pytest + compose + Ansible + shell syntax.
+- 📊 **Rich reporting**: HTML report with severity-coded tables, full findings attachment.
+- ♻️ **Operable**: ISM retention, DB backups, log rotation, dead-man's-switch monitoring.
+
+## Quick start (local)
+
 ```bash
-cd compose/orchestrator && python -m pytest tests/ -q   # orchestrator unit testlar (11)
+cp compose/.env.example compose/.env
+cp compose/defectdojo/.env.example compose/defectdojo/.env   # fill required secrets
+bash scripts/bootstrap-central.sh     # rotates passwords + certs + brings up the stack
+bash scripts/configure-retention.sh   # index retention policy
+bash test/e2e.sh                       # end-to-end smoke test
 ```
+Access (internal-only) via SSH tunnel:
+```bash
+ssh -L 8444:127.0.0.1:8444 -L 8888:127.0.0.1:8888 user@host
+# Wazuh: https://localhost:8444   ·   DefectDojo: http://localhost:8888
+```
+> Full stack needs ~12 GB RAM. See the guide for low-RAM staging.
+
+## Documentation
+
+- 📘 **[Full Guide](docs/GUIDE.md)** — install · configure · operate · troubleshoot · extend
+- 🚀 **[Production Readiness](docs/PROD-READINESS.md)** — deploy runbook + checklist
+- 🏗️ **[Architecture](docs/architecture.md)** — components, data flow, diagrams
+- 📐 **[Design spec](docs/specs/2026-05-29-tizim-design.md)** · **[Build plan](docs/plans/2026-05-29-tizim-build.md)**
+
+## Project structure
+
+```
+compose/      central stack — wazuh/ · defectdojo/ · orchestrator/ (Python)
+ansible/      wazuh_agent + openscap roles, inventory
+scanning/     scan targets (images.txt, repos.yml)
+scripts/      bootstrap, secret rotation, telegram, retention, backup, enroll
+test/         e2e smoke test
+docs/         guide, architecture, production readiness, spec, plan
+```
+
+## License
+
+[MIT](LICENSE)
