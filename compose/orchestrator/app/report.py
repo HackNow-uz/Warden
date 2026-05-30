@@ -29,7 +29,7 @@ def render_text_report(findings, prev_total=None):
     counts = aggregate_severities(findings)
     total = len(findings)
     lines = [
-        "TIZIM — kunlik xavfsizlik hisoboti",
+        "Warden — kunlik xavfsizlik hisoboti",
         "=" * 32,
         f"Jami zaiflik: {total}{_trend(prev_total, total)}",
         "-" * 32,
@@ -104,7 +104,7 @@ def _summary_block(findings, generated_at, prev_total):
     badges = "".join(_badge(s, counts[s]) for s in SEVERITIES)
     return (
         '<div style="font:14px Arial;color:#0f172a">'
-        '<h2 style="margin:0 0 4px;color:#0f172a">TIZIM — Xavfsizlik Hisoboti</h2>'
+        '<h2 style="margin:0 0 4px;color:#0f172a">Warden — Xavfsizlik Hisoboti</h2>'
         f'<div style="color:#64748b;font-size:13px">Yaratildi: {_e(generated_at)}</div>'
         f'<div style="margin:14px 0;font-size:20px">Jami zaiflik: <b>{total}</b>'
         f'<span style="color:#64748b;font-size:14px">{_e(_trend(prev_total, total))}</span></div>'
@@ -144,8 +144,8 @@ def render_html_full(findings, generated_at):
         parts.append(_table(group))
     return (
         '<!DOCTYPE html><html lang="uz"><head><meta charset="utf-8">'
-        '<title>TIZIM hisobot</title></head>'
+        '<title>Warden hisobot</title></head>'
         f'<body style="margin:0;padding:20px;background:#f8fafc">{"".join(parts)}'
-        f'<p style="font:11px Arial;color:#94a3b8;margin-top:24px">TIZIM · jami {len(findings)} '
+        f'<p style="font:11px Arial;color:#94a3b8;margin-top:24px">Warden · jami {len(findings)} '
         f'topilma · {_e(generated_at)}</p></body></html>'
     )

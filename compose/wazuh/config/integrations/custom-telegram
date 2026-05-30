@@ -26,7 +26,7 @@ except (OSError, ValueError):
 rule = alert.get("rule", {})
 agent = alert.get("agent", {})
 msg = (
-    f"\U0001F6E1 TIZIM alert [L{rule.get('level', '')}] "
+    f"\U0001F6E1 Warden alert [L{rule.get('level', '')}] "
     f"{agent.get('name', '?')}: {rule.get('description', 'alert')}"
 )
 

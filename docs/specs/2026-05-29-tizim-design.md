@@ -1,4 +1,4 @@
-# TIZIM — Ichki Xavfsizlik Monitoring Platformasi
+# Warden — Ichki Xavfsizlik Monitoring Platformasi
 
 **Dizayn spetsifikatsiyasi**
 **Sana:** 2026-05-29
@@ -70,10 +70,10 @@ Noldan yozilmaydi. Sanoatda yetuk ochiq kodli stek quriladi va o'zaro ulanadi:
 8. (real-vaqt) manager:    CRITICAL/HIGH yangi CVE → alert (Telegram)
 ```
 
-## 5. Repo strukturasi (`TIZIM/`)
+## 5. Repo strukturasi (`Warden/`)
 
 ```
-TIZIM/
+Warden/
 ├── README.md
 ├── .gitignore                      # .env, *.key, ansible retry, __pycache__
 ├── docs/

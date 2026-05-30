@@ -35,7 +35,7 @@
     dest: /etc/systemd/system/tizim-scap.service
     content: |
       [Unit]
-      Description=TIZIM CIS SCAP scan
+      Description=Warden CIS SCAP scan
       [Service]
       Type=oneshot
       ExecStart=/usr/bin/oscap xccdf eval --profile {{ oscap_profile }} --results {{ oscap_report_dir }}/results.xml --report {{ oscap_report_dir }}/report.html {{ oscap_datastream }}
@@ -47,7 +47,7 @@
     dest: /etc/systemd/system/tizim-scap.timer
     content: |
       [Unit]
-      Description=TIZIM CIS SCAP kunlik
+      Description=Warden CIS SCAP kunlik
       [Timer]
       OnCalendar=*-*-* 01:30:00
       Persistent=true

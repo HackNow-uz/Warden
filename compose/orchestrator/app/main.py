@@ -22,11 +22,11 @@ except ImportError:
 
 def _alert_failure(s, exc):
     """No silent failure: notify on any error in the daily cycle."""
-    err = f"⚠️ TIZIM kunlik sikl XATO: {exc}"
+    err = f"⚠️ Warden kunlik sikl XATO: {exc}"
     try:
         send_telegram(s.telegram_bot_token, s.telegram_chat_id, err)
         send_email(s.smtp_host, s.smtp_port, s.smtp_from, s.smtp_to,
-                   "TIZIM XATO", err,
+                   "Warden XATO", err,
                    user=s.smtp_user, password=s.smtp_password, use_tls=s.smtp_tls)
     except Exception:  # noqa: BLE001 — alerting must never mask the original error
         pass
@@ -51,7 +51,7 @@ def run_daily():
                       html_full, "text/html")
         send_telegram(s.telegram_bot_token, s.telegram_chat_id, text)
         send_email(s.smtp_host, s.smtp_port, s.smtp_from, s.smtp_to,
-                   f"TIZIM kunlik hisobot — {generated_at}", text,
+                   f"Warden kunlik hisobot — {generated_at}", text,
                    user=s.smtp_user, password=s.smtp_password, use_tls=s.smtp_tls,
                    html=html_body, attachments=[attachment])
         print(text)

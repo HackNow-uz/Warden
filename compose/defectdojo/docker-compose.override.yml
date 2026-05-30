@@ -1,4 +1,4 @@
-# TIZIM production override (released-image DefectDojo compose ustiga).
+# Warden production override (released-image DefectDojo compose ustiga).
 # - nginx'ni shared `tizim_net`'ga DEKLARATIV ulaydi (orchestrator `nginx:8080` topadi).
 # - resurs limitlari.
 networks:

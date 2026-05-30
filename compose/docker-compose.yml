@@ -1,4 +1,4 @@
-# TIZIM top-level: orchestrator + mailhog.
+# Warden top-level: orchestrator + mailhog.
 # Wazuh va DefectDojo o'z compose fayllarida (compose/wazuh, compose/defectdojo).
 # Uchala stek `tizim_net` (external) tarmog'ida — bootstrap skripti tarmoqni yaratadi
 # va Wazuh/DefectDojo konteynerlarini unga ulaydi (alias bilan), shunda orchestrator

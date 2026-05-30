@@ -1,4 +1,4 @@
-# TIZIM — Arxitektura
+# Warden — Arxitektura
 
 Self-hosted, ochiq kodli ichki xavfsizlik monitoring platformasi. To'rt o'lcham
 (OS paket CVE · Docker image · kod bog'liqlik · CIS/SCAP) bitta markazda

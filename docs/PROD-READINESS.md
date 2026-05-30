@@ -1,6 +1,6 @@
-# TIZIM — Production Readiness
+# Warden — Production Readiness
 
-Ushbu hujjat TIZIM'ni haqiqiy production muhitga chiqarish uchun hardening holatini,
+Ushbu hujjat Warden'ni haqiqiy production muhitga chiqarish uchun hardening holatini,
 operator checklist'ini, deploy runbook'ini va xavfsizlik posturasini bayon qiladi.
 
 > **Holat:** Barcha kritik va muhim kamchiliklar repo darajasida yopildi (quyida).
@@ -32,7 +32,7 @@ operator checklist'ini, deploy runbook'ini va xavfsizlik posturasini bayon qilad
 
 ```bash
 # 1. Repo va env
-git clone <tizim-repo> /opt/TIZIM && cd /opt/TIZIM
+git clone <tizim-repo> /opt/Warden && cd /opt/Warden
 cp compose/.env.example compose/.env
 cp compose/defectdojo/.env.example compose/defectdojo/.env
 
@@ -57,7 +57,7 @@ cp ansible/inventory.ini.example ansible/inventory.ini   # real serverlar + SSH 
 bash scripts/enroll-agents.sh
 
 # 7. Backup cron (host crontab)
-echo "0 3 * * * cd /opt/TIZIM && TIZIM_BACKUP_DIR=/var/backups/tizim bash scripts/backup-defectdojo.sh" | crontab -
+echo "0 3 * * * cd /opt/Warden && WARDEN_BACKUP_DIR=/var/backups/tizim bash scripts/backup-defectdojo.sh" | crontab -
 
 # 8. Tekshiruv
 bash test/e2e.sh

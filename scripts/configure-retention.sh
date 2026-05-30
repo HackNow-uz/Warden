@@ -21,7 +21,7 @@ IDX_URL="https://${IDX_HOST}:${IDX_PORT}"
 read -r -d '' POLICY <<JSON || true
 {
   "policy": {
-    "description": "TIZIM: wazuh-alerts retention (${DAYS}d)",
+    "description": "Warden: wazuh-alerts retention (${DAYS}d)",
     "default_state": "hot",
     "states": [
       {"name": "hot", "actions": [],

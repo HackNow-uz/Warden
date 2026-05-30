@@ -1,6 +1,6 @@
-# TIZIM — To'liq Qo'llanma (GUIDE)
+# Warden — To'liq Qo'llanma (GUIDE)
 
-Ushbu hujjat TIZIM'ni **noldan tushunish, o'rnatish, sozlash, ishlatish, kuzatish va
+Ushbu hujjat Warden'ni **noldan tushunish, o'rnatish, sozlash, ishlatish, kuzatish va
 kengaytirish** uchun yagona batafsil qo'llanma. Tezkor havolalar:
 [README](../README.md) · [Arxitektura](architecture.md) · [Production checklist](PROD-READINESS.md) ·
 [Spec](specs/2026-05-29-tizim-design.md) · [Reja](plans/2026-05-29-tizim-build.md)
@@ -8,7 +8,7 @@ kengaytirish** uchun yagona batafsil qo'llanma. Tezkor havolalar:
 ---
 
 ## Mundarija
-1. [TIZIM nima va nega](#1-tizim-nima-va-nega)
+1. [Warden nima va nega](#1-tizim-nima-va-nega)
 2. [Arxitektura](#2-arxitektura)
 3. [Talablar](#3-talablar)
 4. [O'rnatish (lokal sinov)](#4-ornatish-lokal-sinov)
@@ -25,9 +25,9 @@ kengaytirish** uchun yagona batafsil qo'llanma. Tezkor havolalar:
 
 ---
 
-## 1. TIZIM nima va nega
+## 1. Warden nima va nega
 
-TIZIM — **self-hosted, ochiq kodli ichki xavfsizlik monitoring platformasi**. U RHEL-oilasi
+Warden — **self-hosted, ochiq kodli ichki xavfsizlik monitoring platformasi**. U RHEL-oilasi
 (Rocky/Alma/RHEL) serverlaringizdagi zaifliklarni markazlashgan tarzda kuzatib, **har kuni
 avtomatik HTML xavfsizlik hisobotini** yuboradi.
 
@@ -89,7 +89,7 @@ orchestrator ularga TLS-mos nomlar bilan yetadi, restart'dan keyin ham saqlanadi
 ## 4. O'rnatish (lokal sinov)
 
 ```bash
-git clone <tizim-repo> && cd TIZIM
+git clone <tizim-repo> && cd Warden
 cp compose/.env.example compose/.env
 cp compose/defectdojo/.env.example compose/defectdojo/.env
 # DefectDojo majburiy kalitlarini to'ldiring (6-bo'lim)
@@ -226,8 +226,8 @@ curl -sk -H "Authorization: Bearer $TOKEN" "https://127.0.0.1:55000/agents?selec
 ## 10. Texnik xizmat
 
 - **Backup (kunlik cron):**
-  `echo "0 3 * * * cd /opt/TIZIM && bash scripts/backup-defectdojo.sh" | crontab -`
-  (`TIZIM_BACKUP_DIR`, `BACKUP_KEEP_DAYS` sozlanadi.)
+  `echo "0 3 * * * cd /opt/Warden && bash scripts/backup-defectdojo.sh" | crontab -`
+  (`WARDEN_BACKUP_DIR`, `BACKUP_KEEP_DAYS` sozlanadi.)
 - **Retention:** `RETENTION_DAYS=90 bash scripts/configure-retention.sh` (yangi indekslarga avto).
 - **Loglar:** orchestrator → docker `json-file` (10m × 3) avto-rotation. `docker logs compose-orchestrator-1`.
 - **Heartbeat:** `HEARTBEAT_URL` o'rnatilsa, kunlik sikl ishlamasa tashqi xizmat (healthchecks.io) alert beradi.
@@ -267,7 +267,7 @@ indexer `/_cat/indices`, `docker ps` status/healthcheck.
 - **TLS verification HECH QACHON o'chirilmaydi** — orchestrator Wazuh CA'ga qarshi tekshiradi.
 - **SMTP auth faqat TLS bilan** (cleartext parol himoyasi).
 - **docker.sock mount qilinmaydi** (host-root oldini olish) — Trivy registry'dan pull qiladi.
-- **Resurs limitlari** — TIZIM boshqa servislarni siqib qo'ymaydi.
+- **Resurs limitlari** — Warden boshqa servislarni siqib qo'ymaydi.
 
 ---
 

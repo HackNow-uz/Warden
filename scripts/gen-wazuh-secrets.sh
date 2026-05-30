@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TIZIM — Wazuh DEMO parollarini kuchli tasodifiy parollar bilan almashtiradi.
+# Warden — Wazuh DEMO parollarini kuchli tasodifiy parollar bilan almashtiradi.
 #
 # MAJBURIY: prod'dan oldin ishlatiladi. Wazuh single-node 3 ta demo cred bilan keladi:
 #   admin / SecretPassword        (indexer; filebeat, dashboard, orchestrator ishlatadi)

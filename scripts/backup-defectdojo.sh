@@ -3,7 +3,7 @@
 # Retention: BACKUP_KEEP_DAYS (default 14) kun.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-OUT="${TIZIM_BACKUP_DIR:-/var/backups/tizim}"
+OUT="${WARDEN_BACKUP_DIR:-/var/backups/tizim}"
 KEEP="${BACKUP_KEEP_DAYS:-14}"
 mkdir -p "$OUT"
 TS=$(date +%Y%m%d-%H%M)

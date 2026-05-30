@@ -1,17 +1,17 @@
-# TIZIM Build — Implementation Plan
+# Warden Build — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a self-hosted, open-source security monitoring platform (Wazuh + Trivy/Grype + DefectDojo + OpenSCAP) as an Infrastructure-as-Code repo under `TIZIM/`, locally testable with Docker, deployable to RHEL-family servers via Ansible, emitting a daily security report.
+**Goal:** Build a self-hosted, open-source security monitoring platform (Wazuh + Trivy/Grype + DefectDojo + OpenSCAP) as an Infrastructure-as-Code repo under `Warden/`, locally testable with Docker, deployable to RHEL-family servers via Ansible, emitting a daily security report.
 
 **Architecture:** Two parts. **Part A** (central stack) runs via Docker Compose on a monitoring host: Wazuh single-node, DefectDojo, and a custom Python "orchestrator" glue service. **Part B** (RHEL targets) is provisioned by Ansible: `wazuh-agent` + `openscap`. A cron-driven daily cycle pulls Wazuh vuln/SCA data, runs Trivy+Grype on images/repos, imports to DefectDojo, and sends a Telegram+email report.
 
 **Tech Stack:** Docker Compose, Wazuh 4.x (≥4.8 CTI engine), DefectDojo, Trivy, Grype, Syft, Python 3.12 (requests, pydantic-settings, pytest), Ansible, Rocky Linux 9 test containers.
 
-**Spec:** `TIZIM/docs/specs/2026-05-29-tizim-design.md`
+**Spec:** `Warden/docs/specs/2026-05-29-tizim-design.md`
 
 **Conventions:**
-- All shell commands assume CWD = `TIZIM/` unless stated.
+- All shell commands assume CWD = `Warden/` unless stated.
 - Commit messages: formal Uzbek, no Claude co-author (per org CLAUDE.md). Conventional Commits prefix allowed.
 - Secrets only in `.env` (gitignored). `.env.example` is committed with placeholder values.
 - "Verify" steps are the IaC equivalent of TDD: bring a thing up, assert it responds, tear down.
@@ -23,9 +23,9 @@
 ### Task 0.1: Initialize repo skeleton
 
 **Files:**
-- Create: `TIZIM/.gitignore`
-- Create: `TIZIM/README.md`
-- Create: `TIZIM/.env.example` (root, points to sub-stack envs)
+- Create: `Warden/.gitignore`
+- Create: `Warden/README.md`
+- Create: `Warden/.env.example` (root, points to sub-stack envs)
 
 - [ ] **Step 1: Create `.gitignore`**
 
@@ -57,7 +57,7 @@ test/_out/
 - [ ] **Step 2: Create `README.md`**
 
 ```markdown
-# TIZIM — Ichki Xavfsizlik Monitoring Platformasi
+# Warden — Ichki Xavfsizlik Monitoring Platformasi
 
 Self-hosted, ochiq kodli xavfsizlik monitoring stek: **Wazuh** (markaz) +
 **Trivy/Grype** (konteyner & kod skani) + **DefectDojo** (agregatsiya) +
@@ -92,7 +92,7 @@ Batafsil: `docs/specs/2026-05-29-tizim-design.md`
 - [ ] **Step 4: Init git and first commit**
 
 ```bash
-cd TIZIM && git init -b main
+cd Warden && git init -b main
 git add .gitignore README.md .env.example docs/
 git commit -m "chore: repo skeleti va dastlabki hujjatlar"
 ```
@@ -203,7 +203,7 @@ Inside the root `<ossec_config>` of `wazuh_manager.conf`, add:
 ```xml
   <reports>
     <category>vulnerability-detector</category>
-    <title>TIZIM kunlik zaiflik hisoboti</title>
+    <title>Warden kunlik zaiflik hisoboti</title>
     <email_to>secops@local</email_to>
   </reports>
 ```
@@ -301,7 +301,7 @@ Run (replace TOKEN):
 T="<DD_API_TOKEN>"
 PID=$(curl -s -X POST http://localhost:8080/api/v2/products/ \
   -H "Authorization: Token $T" -H "Content-Type: application/json" \
-  -d '{"name":"TIZIM Infra","description":"Internal infra","prod_type":1}' | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
+  -d '{"name":"Warden Infra","description":"Internal infra","prod_type":1}' | python3 -c "import sys,json;print(json.load(sys.stdin)['id'])")
 echo "Product=$PID"
 ```
 Expected: product id printed. (Engagements created per-run by orchestrator.)
@@ -482,7 +482,7 @@ def render_text_report(findings, prev_total=None):
     counts = aggregate_severities(findings)
     total = len(findings)
     lines = [
-        "TIZIM — kunlik xavfsizlik hisoboti",
+        "Warden — kunlik xavfsizlik hisoboti",
         "=" * 32,
         f"Jami zaiflik: {total}{_trend(prev_total, total)}",
         "-" * 32,
@@ -736,7 +736,7 @@ def run_daily():
     text = render_text_report(findings)
     send_telegram(s.telegram_bot_token, s.telegram_chat_id, text)
     send_email(s.smtp_host, s.smtp_port, s.smtp_from, s.smtp_to,
-               "TIZIM kunlik hisobot", text)
+               "Warden kunlik hisobot", text)
     print(text)
     return 0
 
@@ -953,7 +953,7 @@ def import_scan(dd_url, token, product_id, scan_type, target, raw_json):
     headers = {"Authorization": f"Token {token}"}
     data = {
         "scan_type": scan_type,
-        "product_name": "TIZIM Infra",
+        "product_name": "Warden Infra",
         "engagement_name": f"daily-{target}",
         "auto_create_context": "true",
         "active": "true",
@@ -1258,7 +1258,7 @@ oscap_report_dir: "/var/log/tizim-scap"
     dest: /etc/systemd/system/tizim-scap.service
     content: |
       [Unit]
-      Description=TIZIM CIS SCAP scan
+      Description=Warden CIS SCAP scan
       [Service]
       Type=oneshot
       ExecStart=/usr/bin/oscap xccdf eval --profile {{ oscap_profile }} --results {{ oscap_report_dir }}/results.xml --report {{ oscap_report_dir }}/report.html {{ oscap_datastream }}
@@ -1269,7 +1269,7 @@ oscap_report_dir: "/var/log/tizim-scap"
     dest: /etc/systemd/system/tizim-scap.timer
     content: |
       [Unit]
-      Description=TIZIM CIS SCAP kunlik
+      Description=Warden CIS SCAP kunlik
       [Timer]
       OnCalendar=*-*-* 01:30:00
       Persistent=true
@@ -1329,7 +1329,7 @@ BOT="${CONF%%|*}"; CHAT="${CONF##*|}"
 RULE=$(python3 -c "import json,sys;d=json.load(open('$ALERT_FILE'));print(d.get('rule',{}).get('description','alert'))")
 LVL=$(python3 -c "import json,sys;d=json.load(open('$ALERT_FILE'));print(d.get('rule',{}).get('level',''))")
 AGENT=$(python3 -c "import json,sys;d=json.load(open('$ALERT_FILE'));print(d.get('agent',{}).get('name','?'))")
-MSG="🛡️ TIZIM alert [L$LVL] $AGENT: $RULE"
+MSG="🛡️ Warden alert [L$LVL] $AGENT: $RULE"
 curl -s -X POST "https://api.telegram.org/bot$BOT/sendMessage" \
   -d "chat_id=$CHAT" --data-urlencode "text=$MSG" >/dev/null
 ```
@@ -1447,7 +1447,7 @@ set -euo pipefail
 fail() { echo "❌ $1"; exit 1; }
 pass() { echo "✅ $1"; }
 
-echo "== TIZIM E2E =="
+echo "== Warden E2E =="
 
 # 1. Wazuh dashboard
 code=$(curl -sk -o /dev/null -w "%{http_code}" https://localhost:443 || true)

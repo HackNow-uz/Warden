@@ -1,4 +1,4 @@
-# TIZIM production override (vendored Wazuh compose ustiga).
+# Warden production override (vendored Wazuh compose ustiga).
 # - indexer/manager'ni shared `tizim_net`'ga DEKLARATIV ulaydi (service-name = alias):
 #   orchestrator `wazuh.indexer`/`wazuh.manager`'ga TLS-mos yetadi, `docker network
 #   connect` qo'lda KERAK EMAS — restart/recreate'dan keyin ham saqlanadi.

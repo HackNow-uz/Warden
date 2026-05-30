@@ -9,6 +9,6 @@ def test_import_scan_posts_multipart(mock_post):
     assert rc == 5
     kwargs = mock_post.call_args.kwargs
     assert kwargs["data"]["scan_type"] == "Trivy Scan"
-    assert kwargs["data"]["product_type_name"] == "TIZIM"
+    assert kwargs["data"]["product_type_name"] == "Warden"
     assert kwargs["data"]["close_old_findings"] == "true"
     assert "Authorization" in kwargs["headers"]

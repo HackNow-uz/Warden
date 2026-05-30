@@ -1,4 +1,4 @@
-name: TIZIM CI
+name: Warden CI
 
 on:
   push:

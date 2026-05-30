@@ -16,7 +16,8 @@ infrastructure for known vulnerabilities, runs CIS/SCAP compliance checks, aggre
 into one dashboard, and emails a full security report every day — all from open-source components,
 wired together with a small, well-tested orchestrator. No SaaS, no per-host licensing.
 
-> Internal codename: **TIZIM** (used for container/network/path identifiers like `tizim_net`).
+> Note: low-level infrastructure identifiers use the short codename `tizim`
+> (e.g. the `tizim_net` Docker network and `/opt/tizim` paths).
 
 ---
 

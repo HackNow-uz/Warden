@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TIZIM end-to-end smoke test. Markaziy stek ko'tarilgan bo'lishi kerak.
+# Warden end-to-end smoke test. Markaziy stek ko'tarilgan bo'lishi kerak.
 # Portlar/parollar .env'dan o'qiladi (hardening: rotatsiya + localhost bind).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -12,7 +12,7 @@ DD_PORT=$(getenv DD_PORT compose/defectdojo/.env);     DD_PORT=${DD_PORT:-8080}
 API_PW=$(getenv WAZUH_API_PASSWORD compose/.env);      API_PW=${API_PW:-MyS3cr37P450r.*-}
 SMTP_HOST=$(getenv SMTP_HOST compose/.env);            SMTP_HOST=${SMTP_HOST:-mailhog}
 
-echo "== TIZIM E2E =="
+echo "== Warden E2E =="
 
 # 1. Wazuh dashboard (localhost) — 302 = login redirect = sog'lom
 code=$(curl -sk -o /dev/null -w "%{http_code}" "https://127.0.0.1:${DASH_PORT}" || true)
